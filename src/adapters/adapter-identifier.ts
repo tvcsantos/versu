@@ -1,8 +1,10 @@
 export type AdapterMetadata = {
   readonly id: string;
-  readonly capabilities: {
-    readonly supportsSnapshots: boolean;
-  }
+  readonly capabilities: AdapterCapabilities
+};
+
+export type AdapterCapabilities = {
+  readonly supportsSnapshots: boolean;
 };
 
 /**

@@ -1,5 +1,5 @@
 /**
- * Check if a file exists
+ * Check if a file or directory exists
  */
-export declare function exists(filePath: string): Promise<boolean>;
+export declare function exists(path: string): Promise<boolean>;
 //# sourceMappingURL=file.d.ts.map

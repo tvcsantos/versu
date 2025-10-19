@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { 
-  parseHierarchyStructure, 
+  getProjectInformation, 
 } from '../src/adapters/gradle/hierarchy-dependencies.js';
 import { RawProjectInformation } from '../src/adapters/hierarchy.js';
 
@@ -48,9 +48,9 @@ describe('Hierarchy Dependencies Parser', () => {
     }
   };
 
-  describe('parseHierarchyStructure', () => {
+  describe('getProjectInformation', () => {
     it('should parse hierarchy structure correctly', () => {
-      const result = parseHierarchyStructure(sampleHierarchy);
+      const result = getProjectInformation(sampleHierarchy);
       
       expect(result.moduleIds).toHaveLength(5);
       expect(result.moduleIds).toContain(':');
@@ -67,7 +67,7 @@ describe('Hierarchy Dependencies Parser', () => {
     });
 
     it('should build affected module relationships correctly', () => {
-      const result = parseHierarchyStructure(sampleHierarchy);
+      const result = getProjectInformation(sampleHierarchy);
       
       // Verify that affected modules are properly stored in the modules
       // Root affects all submodules
@@ -87,7 +87,7 @@ describe('Hierarchy Dependencies Parser', () => {
     });
 
     it('should parse versions correctly from ProjectNode', () => {
-      const result = parseHierarchyStructure(sampleHierarchy);
+      const result = getProjectInformation(sampleHierarchy);
       
       // Verify that versions are correctly parsed from the hierarchy
       expect(result.modules.get(':')?.version.version).toBe('1.0.0');
@@ -98,7 +98,7 @@ describe('Hierarchy Dependencies Parser', () => {
     });
 
     it('should parse types correctly from ProjectNode', () => {
-      const result = parseHierarchyStructure(sampleHierarchy);
+      const result = getProjectInformation(sampleHierarchy);
       
       // Verify that types are correctly parsed from the hierarchy
       expect(result.modules.get(':')?.type).toBe('root');
@@ -132,7 +132,7 @@ describe('Hierarchy Dependencies Parser', () => {
       };
 
       expect(() => {
-        parseHierarchyStructure(hierarchyWithoutRoot);
+        getProjectInformation(hierarchyWithoutRoot);
       }).toThrow('No root module found in hierarchy. Every project hierarchy must contain exactly one module with type "root".');
     });
   });

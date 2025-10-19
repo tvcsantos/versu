@@ -50,7 +50,7 @@ export async function getRawProjectInformation(projectRoot: string): Promise<Raw
 /**
  * Parse the hierarchy structure and extract dependency relationships
  */
-export function parseHierarchyStructure(projectInformation: RawProjectInformation): ProjectInformation {
+export function getProjectInformation(projectInformation: RawProjectInformation): ProjectInformation {
   const moduleIds = Object.keys(projectInformation);
   const modules = new Map<string, Module>();
 

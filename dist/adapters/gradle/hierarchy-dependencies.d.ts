@@ -11,5 +11,5 @@ export declare function getRawProjectInformation(projectRoot: string): Promise<R
 /**
  * Parse the hierarchy structure and extract dependency relationships
  */
-export declare function parseHierarchyStructure(projectInformation: RawProjectInformation): ProjectInformation;
+export declare function getProjectInformation(projectInformation: RawProjectInformation): ProjectInformation;
 //# sourceMappingURL=hierarchy-dependencies.d.ts.map
