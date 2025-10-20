@@ -1,14 +1,13 @@
 import * as core from '@actions/core';
-import { ProcessingModuleChange, ProcessedModuleChange, BumpType, ChangeReason, CommitInfo } from '../adapters/core.js';
 import { Config, getDependencyBumpType } from '../config/index.js';
 import { ModuleRegistry } from './module-registry.js';
-import { calculateCascadeEffects } from '../graph/index.js';
 import { calculateBumpFromCommits } from '../utils/commits.js';
-import { bumpSemVer, bumpToPrerelease, formatSemVer, addBuildMetadata, generateTimestampPrereleaseId } from '../semver/index.js';
-import { getCurrentCommitShortSha } from '../git/index.js';
+import { bumpSemVer, bumpToPrerelease, formatSemVer, addBuildMetadata, generateTimestampPrereleaseId, maxBumpType, BumpType } from '../semver/index.js';
+import { CommitInfo, getCurrentCommitShortSha } from '../git/index.js';
 import { SemVer } from 'semver';
 import { AdapterMetadata } from './adapter-identifier.js';
 import { applySnapshotSuffix } from '../utils/versioning.js';
+import { Module } from '../adapters/project-information.js';
 
 export type VersionBumperOptions = {
   prereleaseMode: boolean;
@@ -19,7 +18,30 @@ export type VersionBumperOptions = {
   timestampVersions: boolean;
   prereleaseId: string;
   repoRoot: string;
+  config: Config;
 };
+
+type ProcessingModuleChange = {
+  readonly module: Module;
+  readonly fromVersion: SemVer;
+  toVersion: string;
+  bumpType: BumpType;
+  reason: ChangeReason | 'unchanged';
+  needsProcessing: boolean;
+};
+
+export type ProcessedModuleChange = {
+  readonly module: Module;
+  readonly fromVersion: SemVer;
+  readonly toVersion: string;
+  readonly bumpType: BumpType;
+  readonly reason: ChangeReason;
+};
+
+export type ChangeReason = 
+  'commits' | 'dependency' | 
+  'cascade' | 'prerelease-unchanged' | 
+  'build-metadata' | 'gradle-snapshot';
 
 export class VersionBumper {
 
@@ -30,8 +52,7 @@ export class VersionBumper {
   }
 
   async calculateVersionBumps(
-    moduleCommits: Map<string, CommitInfo[]>,
-    config: Config
+    moduleCommits: Map<string, CommitInfo[]>
   ): Promise<ProcessedModuleChange[]> {
     core.info('🔢 Calculating version bumps from commits...');
     
@@ -50,15 +71,11 @@ export class VersionBumper {
     }
     
     // Step 1: Calculate initial bump types for all modules
-    const processingModuleChanges = this.calculateInitialBumps(moduleCommits, config);
+    const processingModuleChanges = this.calculateInitialBumps(moduleCommits);
 
     // Step 2: Calculate cascade effects
     core.info('🌊 Calculating cascade effects...');
-    const cascadedChanges = calculateCascadeEffects(
-      this.moduleRegistry,
-      processingModuleChanges,
-      (dependencyBump: BumpType) => getDependencyBumpType(dependencyBump, config)
-    );
+    const cascadedChanges = this.calculateCascadeEffects(processingModuleChanges);
     
     // Step 3: Apply version calculations and transformations
     core.info('🔢 Calculating actual versions...');
@@ -67,7 +84,6 @@ export class VersionBumper {
 
   private calculateInitialBumps(
     moduleCommits: Map<string, CommitInfo[]>,
-    config: Config
   ): ProcessingModuleChange[] {
     const processingModuleChanges: ProcessingModuleChange[] = [];
     
@@ -75,7 +91,7 @@ export class VersionBumper {
       const commits = moduleCommits.get(projectId) || [];
       
       // Determine bump type from commits only
-      const bumpType = calculateBumpFromCommits(commits, config);
+      const bumpType = calculateBumpFromCommits(commits, this.options.config);
       
       // Determine processing requirements and reason
       let reason: ChangeReason | 'unchanged' = 'unchanged';
@@ -108,6 +124,82 @@ export class VersionBumper {
 
     return processingModuleChanges;
   }
+
+
+  /**
+   * Calculate cascade effects when modules change.
+   * Modifies the input array in place and returns all modules with cascade effects applied.
+   */
+  private calculateCascadeEffects(
+    allModuleChanges: ProcessingModuleChange[]
+  ): ProcessingModuleChange[] {
+    const processed = new Set<string>();
+    const moduleMap = new Map<string, ProcessingModuleChange>();
+    
+    // Create module map for O(1) lookups
+    for (const change of allModuleChanges) {
+      moduleMap.set(change.module.id, change);
+    }
+    
+    // Start with ALL modules - treat them completely equally
+    const queue = [...allModuleChanges];
+
+    while (queue.length > 0) {
+      const currentChange = queue.shift()!;
+      
+      // Skip if already processed or no processing needed or no actual bump
+      if (processed.has(currentChange.module.id) || !currentChange.needsProcessing || currentChange.bumpType === 'none') {
+        core.debug(`🔄 Skipping module ${currentChange.module.id} - already processed or no processing needed`);
+        continue;
+      }
+      
+      processed.add(currentChange.module.id);
+      const currentModuleInfo = this.moduleRegistry.getModule(currentChange.module.id);
+
+      for (const dependentName of currentModuleInfo.affectedModules) {
+        core.debug(`➡️ Processing dependent module ${dependentName} affected by ${currentChange.module.id} with bump ${currentChange.bumpType}`);
+        
+        if (processed.has(dependentName)) {
+          core.debug(`🔄 Skipping dependent module ${dependentName} - already processed`);
+          continue; // Already processed this module
+        }
+
+        // Get the dependent module using O(1) lookup
+        const existingChange = moduleMap.get(dependentName);
+        if (!existingChange) {
+          core.debug(`⚠️ Dependent module ${dependentName} not found in module changes list`);
+          continue; // Module not found in our module list
+        }
+
+        // Calculate the bump needed for the dependent
+        const requiredBump = getDependencyBumpType(currentChange.bumpType, this.options.config)
+        
+        if (requiredBump === 'none') {
+          core.debug(`➡️ No cascade bump needed for module ${dependentName} from ${currentChange.module.id}`);
+          continue; // No cascade needed
+        }
+
+        // Update the existing change with cascade information
+        const mergedBump = maxBumpType([existingChange.bumpType, requiredBump]);
+        if (mergedBump !== existingChange.bumpType || !existingChange.needsProcessing) {
+          core.debug(`🔄 Cascading bump for module ${dependentName} from ${existingChange.bumpType} to ${mergedBump} due to ${currentChange.module.id}`);
+          // Update the module change in place
+          existingChange.bumpType = mergedBump;
+          existingChange.reason = 'cascade';
+          existingChange.needsProcessing = true;
+          
+          // Add to queue for further processing
+          queue.push(existingChange);
+        } else {
+          core.debug(`🔄 No changes needed for module ${dependentName} - already at ${existingChange.bumpType}`);
+        }
+      }
+    }
+
+    // Return the modified array (same reference, but with cascade effects applied)
+    return allModuleChanges;
+  }
+
 
   private applyVersionCalculations(
     processingModuleChanges: ProcessingModuleChange[],

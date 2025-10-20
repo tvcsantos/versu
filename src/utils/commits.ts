@@ -1,6 +1,6 @@
-import { BumpType, CommitInfo } from '../adapters/core.js';
 import { getBumpTypeForCommit, Config } from '../config/index.js';
-import { maxBumpType } from '../semver/index.js';
+import { CommitInfo } from '../git/index.js';
+import { BumpType, maxBumpType } from '../semver/index.js';
 
 /**
  * Calculate the overall bump type from a collection of commits.

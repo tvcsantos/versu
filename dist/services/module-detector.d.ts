@@ -1,4 +1,4 @@
-import { ModuleRegistry } from "./module-registry";
+import { ModuleRegistry } from "./module-registry.js";
 export interface ModuleDetector {
     readonly repoRoot: string;
     /**

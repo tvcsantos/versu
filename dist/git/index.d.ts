@@ -1,4 +1,3 @@
-import { CommitInfo } from '../adapters/core.js';
 export type GitTag = {
     readonly name: string;
     readonly hash: string;
@@ -7,6 +6,15 @@ export type GitTag = {
 };
 export type GitOptions = {
     readonly cwd?: string;
+};
+export type CommitInfo = {
+    readonly hash: string;
+    readonly type: string;
+    readonly scope?: string;
+    readonly subject: string;
+    readonly body?: string;
+    readonly breaking: boolean;
+    readonly module?: string;
 };
 /**
  * Get commits since the last tag for a specific module

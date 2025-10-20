@@ -1,5 +1,6 @@
-import { ProcessedModuleChange, BumpType } from '../adapters/core.js';
 import { VersionManager } from './version-manager.js';
+import { BumpType } from '../semver/index.js';
+import { ProcessedModuleChange } from './version-bumper.js';
 export type VersionApplierOptions = {
     dryRun: boolean;
 };

@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { 
   getProjectInformation, 
 } from '../src/adapters/gradle/gradle-project-information.js';
-import { RawProjectInformation } from '../src/adapters/core.js';
+import { RawProjectInformation } from '../src/adapters/project-information.js';
 
 describe('Project Information Parser', () => {
   const sampleHierarchy: RawProjectInformation = {

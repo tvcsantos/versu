@@ -1,12 +1,9 @@
 import { join } from 'path';
-import {
-  RawProjectInformation
-} from '../core.js';
 import { getExecOutput } from '@actions/exec';
 import { createInitialVersion, parseSemVer } from '../../semver/index.js';
 import { exists } from '../../utils/file.js';
-import { getGitHubActionPath } from '../../io/action.js';
-import { Module, ProjectInformation } from '../core.js';
+import { getGitHubActionPath } from '../../utils/actions.js';
+import { Module, ProjectInformation, RawProjectInformation } from '../project-information.js';
 
 const GRADLE_WRAPPER = 'gradlew'
 const GRADLE_INIT_SCRIPT = 'init-project-information.gradle.kts'

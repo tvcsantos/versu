@@ -1,6 +1,7 @@
 import * as semver from 'semver';
 import { SemVer } from 'semver';
-import { BumpType } from '../adapters/core.js';
+
+export type BumpType = 'major' | 'minor' | 'patch' | 'none';
 
 /**
  * Parse a semantic version string into a SemVer object using node-semver

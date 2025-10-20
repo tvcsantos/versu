@@ -1,4 +1,4 @@
-import { BumpType } from '../adapters/core.js';
+import { BumpType } from '../semver/index.js';
 export type Config = {
     readonly defaultBump: BumpType;
     readonly commitTypes: Record<string, BumpType | 'ignore'>;

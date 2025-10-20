@@ -1,7 +1,7 @@
 import * as core from '@actions/core';
-import { CommitInfo } from '../adapters/core.js';
 import { generateChangelogsForModules, generateRootChangelog } from '../changelog/index.js';
 import { ModuleChangeResult } from './version-applier.js';
+import { CommitInfo } from '../git/index.js';
 
 export type ChangelogGeneratorOptions = {
   generateChangelog: boolean;

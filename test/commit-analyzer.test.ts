@@ -2,8 +2,9 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { CommitAnalyzer } from '../src/services/commit-analyzer.js';
 import * as gitIndex from '../src/git/index.js';
 import { parseSemVer } from '../src/semver/index.js';
-import { CommitInfo, Module, ProjectInformation } from '../src/adapters/core.js';
 import { ModuleRegistry } from '../src/services/module-registry.js';
+import { CommitInfo } from '../src/git/index.js';
+import { Module, ProjectInformation } from '../src/adapters/project-information.js';
 
 // Mock the git module
 vi.mock('../src/git/index.js', () => ({
@@ -11,12 +12,10 @@ vi.mock('../src/git/index.js', () => ({
 }));
 
 describe('CommitAnalyzer - Child Module Exclusion', () => {
-  let commitAnalyzer: CommitAnalyzer;
   let moduleRegistry: ModuleRegistry;
 
   beforeEach(() => {
     vi.clearAllMocks();
-    commitAnalyzer = new CommitAnalyzer('/repo');
   });
 
   describe('child module path exclusion', () => {
@@ -93,7 +92,8 @@ describe('CommitAnalyzer - Child Module Exclusion', () => {
       );
 
       // Analyze commits
-      const result = await commitAnalyzer.analyzeCommitsSinceLastRelease(moduleRegistry);
+      const commitAnalyzer = new CommitAnalyzer(moduleRegistry, '/repo');
+      const result = await commitAnalyzer.analyzeCommitsSinceLastRelease();
 
       // Verify each module got the correct commits
       expect(result.get(':core')).toEqual(coreCommits);
@@ -161,7 +161,8 @@ describe('CommitAnalyzer - Child Module Exclusion', () => {
         }
       );
 
-      await commitAnalyzer.analyzeCommitsSinceLastRelease(moduleRegistry);
+      const commitAnalyzer = new CommitAnalyzer(moduleRegistry, '/repo');
+      await commitAnalyzer.analyzeCommitsSinceLastRelease();
 
       // Verify the mock was called with correct exclusions (assertions are in mock implementation)
       expect(vi.mocked(gitIndex.getCommitsSinceLastTag)).toHaveBeenCalledTimes(3);
@@ -223,7 +224,8 @@ describe('CommitAnalyzer - Child Module Exclusion', () => {
         }
       );
 
-      const result = await commitAnalyzer.analyzeCommitsSinceLastRelease(moduleRegistry);
+      const commitAnalyzer = new CommitAnalyzer(moduleRegistry, '/repo');
+      const result = await commitAnalyzer.analyzeCommitsSinceLastRelease();
 
       // Root should have its commits with all submodules excluded
       expect(result.get(':')).toEqual(rootCommits);
@@ -280,7 +282,8 @@ describe('CommitAnalyzer - Child Module Exclusion', () => {
         }
       );
 
-      const result = await commitAnalyzer.analyzeCommitsSinceLastRelease(moduleRegistry);
+      const commitAnalyzer = new CommitAnalyzer(moduleRegistry, '/repo');
+      const result = await commitAnalyzer.analyzeCommitsSinceLastRelease();
 
       // Both modules should get their commits without any filtering
       expect(result.get(':utils')).toEqual(utilsCommits);

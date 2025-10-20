@@ -1,6 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { bumpToPrerelease, parseSemVer, addBuildMetadata, generateTimestampPrereleaseId } from '../src/semver/index.js';
-import { BumpType } from '../src/adapters/core.js';
+import { bumpToPrerelease, parseSemVer, addBuildMetadata, generateTimestampPrereleaseId, BumpType } from '../src/semver/index.js';
 
 describe('Pre-release Version Management', () => {
   describe('bumpToPrerelease', () => {

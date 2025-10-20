@@ -1,4 +1,4 @@
-import { Module, ProjectInformation } from "../adapters/core";
+import { Module, ProjectInformation } from "../adapters/project-information.js";
 /**
  * Concrete class for managing hierarchy data.
  * Handles hierarchy operations independent of any build system.

@@ -1,5 +1,4 @@
-import { RawProjectInformation } from '../core.js';
-import { ProjectInformation } from '../core.js';
+import { ProjectInformation, RawProjectInformation } from '../project-information.js';
 /**
  * Execute the gradle hierarchy command to get the JSON output
  */

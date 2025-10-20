@@ -1,5 +1,5 @@
-import { ModuleDetector } from "./module-detector";
-import { VersionUpdateStrategy } from "./version-update-strategy";
+import { ModuleDetector } from "./module-detector.js";
+import { VersionUpdateStrategy } from "./version-update-strategy.js";
 /**
  * Factory interface for creating module system components.
  * Each build system (Gradle, Maven, npm, etc.) should implement this interface.

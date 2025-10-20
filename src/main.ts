@@ -1,4 +1,4 @@
-import { run } from './io/action.js';
+import { run } from './action.js';
 
 // Main entry point for the GitHub Action
 run();

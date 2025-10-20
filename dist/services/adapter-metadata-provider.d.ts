@@ -1,5 +1,5 @@
-import { AdapterMetadata } from './adapter-identifier';
-import { AdapterIdentifierRegistry } from './adapter-identifier-registry';
+import { AdapterMetadata } from './adapter-identifier.js';
+import { AdapterIdentifierRegistry } from './adapter-identifier-registry.js';
 export type AdapterMetadataProviderOptions = {
     adapter?: string;
     repoRoot: string;

@@ -1,5 +1,4 @@
 import { getExecOutput, exec } from '@actions/exec';
-import { CommitInfo } from '../adapters/core.js';
 import * as conventionalCommitsParser from 'conventional-commits-parser';
 import * as core from '@actions/core';
 
@@ -12,6 +11,16 @@ export type GitTag = {
 
 export type GitOptions = {
   readonly cwd?: string;
+};
+
+export type CommitInfo = {
+  readonly hash: string;
+  readonly type: string;
+  readonly scope?: string;
+  readonly subject: string;
+  readonly body?: string;
+  readonly breaking: boolean;
+  readonly module?: string;
 };
 
 /**

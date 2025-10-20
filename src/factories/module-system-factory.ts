@@ -1,5 +1,6 @@
 import { ModuleSystemFactory } from "../services/module-system-factory.js";
 import { GradleModuleSystemFactory } from '../adapters/gradle/services/gradle-module-system-factory.js';
+import { GRADLE_ID } from "../adapters/gradle/constants.js";
 
 /**
  * Create a module system factory for the specified adapter.
@@ -12,7 +13,7 @@ import { GradleModuleSystemFactory } from '../adapters/gradle/services/gradle-mo
  */
 export function createModuleSystemFactory(adapterName: string, repoRoot: string): ModuleSystemFactory {
   switch (adapterName.toLowerCase()) {
-    case 'gradle':
+    case GRADLE_ID:
       return new GradleModuleSystemFactory(repoRoot);
     default:
       throw new Error(`Unsupported adapter: ${adapterName}`);

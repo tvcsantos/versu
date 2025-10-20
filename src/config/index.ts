@@ -3,8 +3,8 @@ import { join } from 'path';
 import * as core from '@actions/core';
 import { cosmiconfig } from 'cosmiconfig';
 import deepmerge from 'deepmerge';
-import { BumpType } from '../adapters/core.js';
 import { exists } from '../utils/file.js';
+import { BumpType } from '../semver/index.js';
 
 export type Config = {
   readonly defaultBump: BumpType;

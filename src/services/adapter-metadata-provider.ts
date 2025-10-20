@@ -1,6 +1,6 @@
 import * as core from '@actions/core';
-import { AdapterMetadata, AdapterIdentifier } from './adapter-identifier';
-import { AdapterIdentifierRegistry } from './adapter-identifier-registry';
+import { AdapterMetadata, AdapterIdentifier } from './adapter-identifier.js';
+import { AdapterIdentifierRegistry } from './adapter-identifier-registry.js';
 
 export type AdapterMetadataProviderOptions = {
   adapter?: string;

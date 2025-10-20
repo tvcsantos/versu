@@ -1,24 +1,24 @@
 import * as core from '@actions/core';
-import { CommitInfo } from '../adapters/core.js';
 import { ModuleRegistry } from './module-registry.js';
-import { getCommitsSinceLastTag } from '../git/index.js';
+import { CommitInfo, getCommitsSinceLastTag } from '../git/index.js';
 
 export class CommitAnalyzer {
   
-  constructor(private readonly repoRoot: string) {
-  }
+  constructor(
+    private readonly moduleRegistry: ModuleRegistry,
+    private readonly repoRoot: string
+  ) {}
 
-  async analyzeCommitsSinceLastRelease(moduleRegistry: ModuleRegistry): Promise<Map<string, CommitInfo[]>> {
+  async analyzeCommitsSinceLastRelease(): Promise<Map<string, CommitInfo[]>> {
     core.info('📝 Analyzing commits since last release...');
     
     const moduleCommits = new Map<string, CommitInfo[]>();
-    
-    for (const [projectId, projectInfo] of moduleRegistry.getModules()) {
+
+    for (const [projectId, projectInfo] of this.moduleRegistry.getModules()) {
       // Find child module paths to exclude from this module's commits
       const childModulePaths = this.findChildModulePaths(
         projectInfo.path,
-        projectId,
-        moduleRegistry
+        projectId
       );
       
       const commits = await getCommitsSinceLastTag(
@@ -48,12 +48,11 @@ export class CommitAnalyzer {
    */
   private findChildModulePaths(
     modulePath: string,
-    moduleId: string,
-    hierarchyManager: ModuleRegistry
+    moduleId: string
   ): string[] {
     const childPaths: string[] = [];
-    
-    for (const [otherId, otherInfo] of hierarchyManager.getModules()) {
+
+    for (const [otherId, otherInfo] of this.moduleRegistry.getModules()) {
       if (otherId !== moduleId && this.isChildPath(otherInfo.path, modulePath)) {
         childPaths.push(otherInfo.path);
       }
