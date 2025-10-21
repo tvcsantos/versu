@@ -1,4 +1,14 @@
 /**
+ * Convert version property name to module path
+ * Examples:
+ * - version -> ":" (root)
+ * - x.version -> ":x"
+ * - x.y.version -> ":x:y"
+ * @param propertyName The version property name
+ * @returns The module ID
+ */
+export declare function versionPropertyNameToModuleId(propertyName: string): string;
+/**
  * Convert module path to version property name
  * Examples:
  * - ":" -> "version"

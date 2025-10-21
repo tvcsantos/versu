@@ -13,7 +13,7 @@ const VERSION_REGEX = /\.version$/;
  * @param propertyName The version property name
  * @returns The module ID
  */
-function versionPropertyNameToModuleId(propertyName: string): string {
+export function versionPropertyNameToModuleId(propertyName: string): string {
   if (propertyName === VERSION) {
     return ROOT_MODULE_ID;
   }
