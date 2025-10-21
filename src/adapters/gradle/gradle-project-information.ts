@@ -6,7 +6,7 @@ import { getGitHubActionPath } from '../../utils/actions.js';
 import { Module, ProjectInformation, RawProjectInformation } from '../project-information.js';
 
 const GRADLE_WRAPPER = 'gradlew'
-const GRADLE_INIT_SCRIPT = 'adapters/gradle/init-project-information.gradle.kts'
+const GRADLE_INIT_SCRIPT = 'src/adapters/gradle/init-project-information.gradle.kts'
 
 /**
  * Execute the gradle hierarchy command to get the JSON output
