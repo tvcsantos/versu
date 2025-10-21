@@ -111,8 +111,3 @@ export async function run(): Promise<void> {
     }
   }
 }
-
-// Auto-run if this is the main module
-if (require.main === module) {
-  run();
-}
