@@ -1,42 +1,65 @@
+import { z } from 'zod';
 import { BumpType } from '../semver/index.js';
+
+/**
+ * Zod schema for BumpType values.
+ * Used for validation in configuration files.
+ */
+const bumpTypeSchema = z.enum(['major', 'minor', 'patch', 'none']);
+
+/**
+ * Zod schema for BumpType or 'ignore' values.
+ * Used for commit type mappings where 'ignore' is allowed.
+ */
+const bumpTypeOrIgnoreSchema = z.enum(['major', 'minor', 'patch', 'none', 'ignore']);
+
+/**
+ * Zod schema for DependencyRules configuration.
+ * Validates that dependency cascade rules use valid bump types.
+ */
+const dependencyRulesSchema = z.object({
+  onMajorOfDependency: bumpTypeSchema,
+  onMinorOfDependency: bumpTypeSchema,
+  onPatchOfDependency: bumpTypeSchema,
+});
+
+/**
+ * Zod schema for NodeJSConfig configuration.
+ * Validates Node.js-specific settings.
+ */
+const nodeJSConfigSchema = z.object({
+  versionSource: z.array(z.literal('package.json')),
+  updatePackageLock: z.boolean(),
+});
+
+/**
+ * Zod schema for the main Config object.
+ * This schema is used by ConfigurationValidator to ensure type-safe
+ * configuration with detailed error messages for invalid configurations.
+ */
+export const configSchema = z.object({
+  defaultBump: bumpTypeSchema,
+  commitTypes: z.record(z.string(), bumpTypeOrIgnoreSchema),
+  dependencyRules: dependencyRulesSchema,
+  nodejs: nodeJSConfigSchema.optional(),
+});
 
 /**
  * Configuration for VERSE version bumping behavior.
  * Controls commit type handling, dependency cascade rules, and adapter-specific settings.
  */
-export type Config = {
-  /** Default bump type to apply when commit type is not in commitTypes map. */
-  readonly defaultBump: BumpType;
-  /** Map of Conventional Commit types to their corresponding bump types or 'ignore'. */
-  readonly commitTypes: Record<string, BumpType | 'ignore'>;
-  /** Rules defining how dependency changes propagate to dependent modules. */
-  readonly dependencyRules: DependencyRules;
-  /** Optional Node.js/npm-specific configuration. */
-  readonly nodejs?: NodeJSConfig;
-};
+export type Config = z.infer<typeof configSchema>;
 
 /**
  * Rules for propagating version changes through dependency relationships.
  * Defines how a module should be bumped when its dependencies change.
  */
-export type DependencyRules = {
-  /** Bump type to apply when a major dependency changes. */
-  readonly onMajorOfDependency: BumpType;
-  /** Bump type to apply when a minor dependency changes. */
-  readonly onMinorOfDependency: BumpType;
-  /** Bump type to apply when a patch dependency changes. */
-  readonly onPatchOfDependency: BumpType;
-};
+export type DependencyRules = z.infer<typeof dependencyRulesSchema>;
 
 /**
  * Configuration for Node.js/npm projects.
  */
-export type NodeJSConfig = {
-  /** Source files to read/write version information (currently only package.json supported). */
-  readonly versionSource: ('package.json')[];
-  /** Whether to update package-lock.json when package.json version changes. */
-  readonly updatePackageLock: boolean;
-};
+export type NodeJSConfig = z.infer<typeof nodeJSConfigSchema>;
 
 /**
  * Default VERSE configuration following Conventional Commits specification.

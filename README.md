@@ -226,7 +226,7 @@ steps:
 
 ## Configuration
 
-VERSE uses [cosmiconfig](https://github.com/davidtheclark/cosmiconfig) for flexible configuration loading. It automatically searches for configuration in multiple formats and locations using standard naming conventions.
+VERSE uses [cosmiconfig](https://github.com/davidtheclark/cosmiconfig) for flexible configuration loading and [Zod](https://github.com/colinhacks/zod) for type-safe validation. It automatically searches for configuration in multiple formats and locations using standard naming conventions, validates the configuration against a schema, and provides detailed error messages if validation fails.
 
 ### Supported Configuration Files
 
@@ -346,6 +346,17 @@ module.exports = {
     config-path: 'custom/path/to/verse.config.js'
 ```
 
+### Configuration Validation
+
+All configuration files are validated using [Zod](https://github.com/colinhacks/zod) schemas to ensure correctness and consistency. This provides:
+
+- **Type Safety**: Configuration values are validated against their expected types
+- **Clear Error Messages**: Invalid configurations produce detailed error messages
+- **Runtime Validation**: Catches configuration errors before execution
+- **Schema Enforcement**: Ensures only valid values are accepted
+
+If validation fails, VERSE will provide a detailed error message indicating which configuration fields are invalid, making it easy to identify and fix issues.
+
 ### Legacy Configuration
 
 If you specify a `config-path` in your GitHub Action, VERSE will try to load that specific file first. If not found, it will fall back to the automatic discovery described above.
@@ -431,11 +442,11 @@ npm run test:coverage # Run with coverage
 ## Architecture
 
 - **`src/adapters/`** - Language-specific adapters (Gradle, with extensible architecture for future adapters)
-- **`src/services/`** - Core services (version bumping, module registry, changelog generation, git operations)
+- **`src/services/`** - Core services (version bumping, module registry, changelog generation, git operations, configuration validation)
 - **`src/factories/`** - Factory pattern implementations for adapter and module system creation
 - **`src/semver/`** - Semantic version utilities
 - **`src/git/`** - Git operations and commit parsing
-- **`src/config/`** - Configuration loading and validation
+- **`src/config/`** - Configuration loading, Zod schema definitions, and validation
 - **`src/changelog/`** - Changelog generation
 - **`src/utils/`** - Utility functions for versioning, commits, and file operations
 

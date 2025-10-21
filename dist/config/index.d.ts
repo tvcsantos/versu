@@ -1,39 +1,95 @@
+import { z } from 'zod';
 import { BumpType } from '../semver/index.js';
+/**
+ * Zod schema for DependencyRules configuration.
+ * Validates that dependency cascade rules use valid bump types.
+ */
+declare const dependencyRulesSchema: z.ZodObject<{
+    onMajorOfDependency: z.ZodEnum<{
+        major: "major";
+        minor: "minor";
+        patch: "patch";
+        none: "none";
+    }>;
+    onMinorOfDependency: z.ZodEnum<{
+        major: "major";
+        minor: "minor";
+        patch: "patch";
+        none: "none";
+    }>;
+    onPatchOfDependency: z.ZodEnum<{
+        major: "major";
+        minor: "minor";
+        patch: "patch";
+        none: "none";
+    }>;
+}, z.core.$strip>;
+/**
+ * Zod schema for NodeJSConfig configuration.
+ * Validates Node.js-specific settings.
+ */
+declare const nodeJSConfigSchema: z.ZodObject<{
+    versionSource: z.ZodArray<z.ZodLiteral<"package.json">>;
+    updatePackageLock: z.ZodBoolean;
+}, z.core.$strip>;
+/**
+ * Zod schema for the main Config object.
+ * This schema is used by ConfigurationValidator to ensure type-safe
+ * configuration with detailed error messages for invalid configurations.
+ */
+export declare const configSchema: z.ZodObject<{
+    defaultBump: z.ZodEnum<{
+        major: "major";
+        minor: "minor";
+        patch: "patch";
+        none: "none";
+    }>;
+    commitTypes: z.ZodRecord<z.ZodString, z.ZodEnum<{
+        major: "major";
+        minor: "minor";
+        patch: "patch";
+        none: "none";
+        ignore: "ignore";
+    }>>;
+    dependencyRules: z.ZodObject<{
+        onMajorOfDependency: z.ZodEnum<{
+            major: "major";
+            minor: "minor";
+            patch: "patch";
+            none: "none";
+        }>;
+        onMinorOfDependency: z.ZodEnum<{
+            major: "major";
+            minor: "minor";
+            patch: "patch";
+            none: "none";
+        }>;
+        onPatchOfDependency: z.ZodEnum<{
+            major: "major";
+            minor: "minor";
+            patch: "patch";
+            none: "none";
+        }>;
+    }, z.core.$strip>;
+    nodejs: z.ZodOptional<z.ZodObject<{
+        versionSource: z.ZodArray<z.ZodLiteral<"package.json">>;
+        updatePackageLock: z.ZodBoolean;
+    }, z.core.$strip>>;
+}, z.core.$strip>;
 /**
  * Configuration for VERSE version bumping behavior.
  * Controls commit type handling, dependency cascade rules, and adapter-specific settings.
  */
-export type Config = {
-    /** Default bump type to apply when commit type is not in commitTypes map. */
-    readonly defaultBump: BumpType;
-    /** Map of Conventional Commit types to their corresponding bump types or 'ignore'. */
-    readonly commitTypes: Record<string, BumpType | 'ignore'>;
-    /** Rules defining how dependency changes propagate to dependent modules. */
-    readonly dependencyRules: DependencyRules;
-    /** Optional Node.js/npm-specific configuration. */
-    readonly nodejs?: NodeJSConfig;
-};
+export type Config = z.infer<typeof configSchema>;
 /**
  * Rules for propagating version changes through dependency relationships.
  * Defines how a module should be bumped when its dependencies change.
  */
-export type DependencyRules = {
-    /** Bump type to apply when a major dependency changes. */
-    readonly onMajorOfDependency: BumpType;
-    /** Bump type to apply when a minor dependency changes. */
-    readonly onMinorOfDependency: BumpType;
-    /** Bump type to apply when a patch dependency changes. */
-    readonly onPatchOfDependency: BumpType;
-};
+export type DependencyRules = z.infer<typeof dependencyRulesSchema>;
 /**
  * Configuration for Node.js/npm projects.
  */
-export type NodeJSConfig = {
-    /** Source files to read/write version information (currently only package.json supported). */
-    readonly versionSource: ('package.json')[];
-    /** Whether to update package-lock.json when package.json version changes. */
-    readonly updatePackageLock: boolean;
-};
+export type NodeJSConfig = z.infer<typeof nodeJSConfigSchema>;
 /**
  * Default VERSE configuration following Conventional Commits specification.
  * Maps common commit types to semantic version bumps and defines dependency cascade rules.
@@ -62,4 +118,5 @@ export declare function getDependencyBumpType(dependencyBumpType: BumpType, conf
  * @returns The adapter-specific configuration, or undefined if not present
  */
 export declare function getAdapterConfig<T extends keyof Config>(config: Config, adapterName: T): Config[T];
+export {};
 //# sourceMappingURL=index.d.ts.map

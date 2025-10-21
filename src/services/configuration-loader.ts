@@ -58,10 +58,8 @@ export class ConfigurationLoader {
         core.info(`📋 Configuration loaded ${configSource}`);
         
         const userConfig = result.config;
-        const validatedConfig = mergeConfig(DEFAULT_CONFIG, userConfig);
-        this.configurationValidator.validate(validatedConfig);
-
-        config = validatedConfig;
+        const validatedConfig = mergeWithDefaults(userConfig);
+        config = this.configurationValidator.validate(validatedConfig);
       } else {
         // No configuration found - use defaults
         core.info(`No configuration found, using defaults`);
@@ -80,15 +78,25 @@ export class ConfigurationLoader {
 }
 
 /**
- * Merges user configuration with default configuration.
- * @param defaultConfig - The default configuration to use as a base
- * @param userConfig - The user-provided configuration to merge
- * @returns The merged configuration (user values override defaults, arrays are replaced)
+ * Custom array merge strategy for deepmerge.
+ * Replaces target array with source array instead of concatenating.
  */
-function mergeConfig(defaultConfig: Config, userConfig: Partial<Config>): Config {
-  return deepmerge(defaultConfig, userConfig, {
-    // Custom merge for arrays - replace instead of concatenating
-    // This ensures user arrays override defaults completely
-    arrayMerge: (target, source) => source,
-  }) as Config;
+const replaceArrayMerge = (_target: any[], source: any[]) => source;
+
+/**
+ * Deepmerge options for merging user configuration with defaults.
+ * Configures array replacement instead of concatenation.
+ */
+const defaultMergeOptions = {
+  arrayMerge: replaceArrayMerge,
+};
+
+/**
+ * Merges user configuration with default configuration.
+ * User values take precedence over defaults. Arrays are replaced entirely rather than concatenated.
+ * @param userConfig - User-provided configuration to merge with defaults
+ * @returns Merged configuration with user values overriding defaults
+ */
+function mergeWithDefaults(userConfig: any): any {
+  return deepmerge(DEFAULT_CONFIG, userConfig, defaultMergeOptions);
 }

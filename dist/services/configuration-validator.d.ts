@@ -1,14 +1,16 @@
-import { Config } from "../config/index.js";
+import { type Config } from "../config/index.js";
 /**
- * Validates VERSE configuration for correctness and consistency.
- * Checks default bump types, commit type mappings, and dependency rules.
+ * Validates VERSE configuration against Zod schema for type safety and correctness.
+ * Ensures all configuration values conform to expected types and constraints,
+ * providing detailed error messages for any validation failures.
  */
 export declare class ConfigurationValidator {
     /**
-     * Validates the provided configuration.
+     * Validates configuration against the schema and returns the validated result.
      * @param config - Configuration object to validate
-     * @throws {Error} If any configuration value is invalid
+     * @returns Validated and typed configuration object
+     * @throws {Error} If validation fails, with detailed error information
      */
-    validate(config: Config): void;
+    validate(config: unknown): Config;
 }
 //# sourceMappingURL=configuration-validator.d.ts.map
