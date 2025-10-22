@@ -165,7 +165,7 @@ export class VerseRunner {
       pushTags: this.options.pushTags,
       repoRoot: this.options.repoRoot,
       dryRun: this.options.dryRun,
-      isTemporaryVersion: !this.options.prereleaseMode && !this.options.appendSnapshot,
+      isTemporaryVersion: this.options.prereleaseMode || this.options.appendSnapshot,
     };
     this.gitOperations = new GitOperations(gitOperationsOptions);
 
