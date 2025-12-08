@@ -1,7 +1,7 @@
 {
   "name": "@muverse/core",
-  "version": "0.1.4",
-  "description": "muVERSE Core - Version Engine for Repo Semantic Evolution (core business logic)",
+  "version": "0.1.5",
+  "description": "Version Engine for Repo Semantic Evolution (Core Library)",
   "type": "module",
   "main": "dist/index.js",
   "exports": {

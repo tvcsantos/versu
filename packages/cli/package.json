@@ -1,7 +1,7 @@
 {
   "name": "@muverse/cli",
-  "version": "0.1.4",
-  "description": "muVERSE CLI - Command-line interface for μVERSE semantic versioning engine",
+  "version": "0.1.5",
+  "description": "Version Engine for Repo Semantic Evolution (CLI)",
   "type": "module",
   "main": "dist/index.js",
   "bin": {
@@ -38,7 +38,7 @@
   "types": "dist/index.d.ts",
   "dependencies": {
     "@oclif/core": "^4.8.0",
-    "@muverse/core": "^0.1.4",
+    "@muverse/core": "^0.1.5",
     "oclif": "^4.14.0"
   },
   "devDependencies": {
