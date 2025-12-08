@@ -1,6 +1,6 @@
 {
   "name": "@muverse/cli",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "Version Engine for Repo Semantic Evolution (CLI)",
   "type": "module",
   "main": "dist/index.js",
@@ -38,7 +38,7 @@
   "types": "dist/index.d.ts",
   "dependencies": {
     "@oclif/core": "^4.8.0",
-    "@muverse/core": "^0.1.5",
+    "@muverse/core": "^0.1.6",
     "oclif": "^4.14.0"
   },
   "devDependencies": {

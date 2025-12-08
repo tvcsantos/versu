@@ -23,7 +23,7 @@ jobs:
           fetch-depth: 0
       - name: μVERSE Semantic Evolution
         id: versioner
-        uses: tvcsantos/muverse@v1
+        uses: tvcsantos/muverse@v0
         with:
           dry-run: false
           # adapter: gradle  # Optional - μVERSE will auto-detect your project type
@@ -44,7 +44,7 @@ If auto-detection fails, μVERSE will throw an error asking you to explicitly sp
 
 ```yaml
 - name: μVERSE Semantic Evolution
-  uses: tvcsantos/muverse@v1
+  uses: tvcsantos/muverse@v0
   with:
     adapter: gradle  # Required if auto-detection fails
 ```
@@ -69,7 +69,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Create pre-release versions
-        uses: tvcsantos/muverse@v1
+        uses: tvcsantos/muverse@v0
         with:
           adapter: gradle
           prerelease-mode: true
@@ -96,7 +96,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Create timestamp versions
-        uses: tvcsantos/muverse@v1
+        uses: tvcsantos/muverse@v0
         with:
           adapter: gradle
           prerelease-mode: true
@@ -128,7 +128,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Create Gradle SNAPSHOT versions
-        uses: tvcsantos/muverse@v1
+        uses: tvcsantos/muverse@v0
         with:
           adapter: gradle
           append-snapshot: true
@@ -168,7 +168,7 @@ This applies `-SNAPSHOT` suffix to **all** module versions, generating versions 
 ```yaml
 - name: μVERSE Semantic Evolution
   id: versioner
-  uses: tvcsantos/muverse@v1
+  uses: tvcsantos/muverse@v0
   
 - name: Check if bumped
   if: steps.versioner.outputs.bumped == 'true'
@@ -199,7 +199,7 @@ For workflows where you want to handle git operations manually:
 
 ```yaml
 - name: Version modules (no git operations)
-  uses: tvcsantos/muverse@v1
+  uses: tvcsantos/muverse@v0
   with:
     adapter: gradle
     push-changes: false    # Disable automatic commit/push
@@ -438,7 +438,7 @@ jobs:
       - name: Release version
         if: github.ref == 'refs/heads/main'
         id: release
-        uses: tvcsantos/muverse@v1
+        uses: tvcsantos/muverse@v0
         with:
           adapter: gradle
           push-changes: true
@@ -448,7 +448,7 @@ jobs:
       - name: Pre-release version
         if: github.ref == 'refs/heads/develop'
         id: prerelease
-        uses: tvcsantos/muverse@v1
+        uses: tvcsantos/muverse@v0
         with:
           adapter: gradle
           prerelease-mode: true
@@ -461,7 +461,7 @@ jobs:
       - name: CI version
         if: startsWith(github.ref, 'refs/heads/feature/')
         id: ci
-        uses: tvcsantos/muverse@v1
+        uses: tvcsantos/muverse@v0
         with:
           adapter: gradle
           prerelease-mode: true
