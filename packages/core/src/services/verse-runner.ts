@@ -71,7 +71,7 @@ export class VerseRunner {
     this.options = {
       ...options,
       repoRoot: path.resolve(options.repoRoot),
-    }
+    };
 
     // Initialize services
     this.configurationLoader = new ConfigurationLoader(
@@ -159,7 +159,6 @@ export class VerseRunner {
   }
 
   private async doRun(): Promise<RunnerResult> {
-
     this.adapter = await this.adapterMetadataProvider.getMetadata();
 
     // Initialize module system factory with resolved adapter
@@ -167,7 +166,6 @@ export class VerseRunner {
       this.adapter.id,
       this.options.repoRoot,
     );
-
     // Load configuration
     this.config = await this.configurationLoader.load(this.options.repoRoot);
 
@@ -189,7 +187,7 @@ export class VerseRunner {
     // Log discovered modules through hierarchy manager
     const moduleIds = this.moduleRegistry.getModuleIds();
     logger.info(`Found ${moduleIds.length} modules: ${moduleIds.join(", ")}`);
-    
+
     // Analyze commits since last release
     this.commitAnalyzer = new CommitAnalyzer(
       this.moduleRegistry,
