@@ -2,17 +2,6 @@
 
 GitHub Actions wrapper for μVERSE (Version Engine for Repo Semantic Evolution). This action provides seamless integration with GitHub workflows for automatic semantic versioning across your monorepo projects.
 
-## Features
-
-✅ **Automatic Version Bumping** - Based on Conventional Commits  
-✅ **Multi-Module Support** - Independent versioning for each module  
-✅ **Dependency Cascade** - Auto-bump dependents when dependencies change  
-✅ **Changelog Generation** - Automatic per-module changelogs  
-✅ **Git Integration** - Automatic commits, tags, and pushes  
-✅ **Pre-release Support** - Alpha, beta, rc, and custom pre-release versions  
-✅ **Adapter Auto-Detection** - Automatically detects project type (Gradle, etc.)  
-✅ **Flexible Configuration** - Via action inputs or configuration files
-
 ## Usage
 
 ### Basic Usage

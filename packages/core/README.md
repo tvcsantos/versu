@@ -2,19 +2,6 @@
 
 The core business logic powering μVERSE (Version Engine for Repo Semantic Evolution). This package is completely framework-agnostic and can be integrated into any TypeScript/JavaScript project, CI/CD system, or custom tooling.
 
-## Features
-
-✅ **Framework-Independent** - No dependencies on GitHub Actions, CLI frameworks, or specific CI/CD systems  
-✅ **Semantic Version Management** - Automatic version calculation based on Conventional Commits  
-✅ **Multi-Module Support** - Independent versioning for each module with dependency tracking  
-✅ **Dependency Cascade** - Auto-bump dependents when dependencies change  
-✅ **Extensible Adapter System** - Plugin architecture for supporting different project types  
-✅ **Changelog Generation** - Automatic per-module changelog creation  
-✅ **Git Operations** - Built-in git commit, tag, and push capabilities  
-✅ **Flexible Configuration** - Multiple configuration formats with Zod validation  
-✅ **Type-Safe** - Full TypeScript support with comprehensive type definitions  
-✅ **Pre-release Support** - Alpha, beta, rc, and custom pre-release versions
-
 ## Installation
 
 ```bash

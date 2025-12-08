@@ -2,18 +2,6 @@
 
 Command-line interface for μVERSE (Version Engine for Repo Semantic Evolution). This CLI provides all the power of μVERSE's semantic versioning engine through an easy-to-use command-line tool, perfect for local development and custom CI/CD systems.
 
-## Features
-
-✅ **Automatic Version Bumping** - Based on Conventional Commits  
-✅ **Multi-Module Support** - Independent versioning for each module  
-✅ **Dependency Cascade** - Auto-bump dependents when dependencies change  
-✅ **Changelog Generation** - Automatic per-module changelogs  
-✅ **Git Integration** - Automatic commits, tags, and pushes  
-✅ **Pre-release Support** - Alpha, beta, rc, and custom pre-release versions  
-✅ **Adapter Auto-Detection** - Automatically detects project type (Gradle, etc.)  
-✅ **Flexible Configuration** - Via CLI flags or configuration files  
-✅ **Human-Friendly Output** - Clear, readable terminal output
-
 ## Installation
 
 ### Global Installation
