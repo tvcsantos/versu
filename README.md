@@ -8,20 +8,13 @@ A semantic versioning engine for monorepos that uses Conventional Commits to aut
 
 ## Key Features
 
-✅ **Conventional Commits Parsing** - Automatically determines version bumps based on commit messages
-
-✅ **Multi-Module Support** - Each module can be versioned independently
-
-✅ **Dependency Cascade** - When a dependency changes, dependents are automatically bumped
-
-✅ **Gradle Adapter** - First-class support for Gradle (Groovy & Kotlin DSL)
-
-✅ **Extensible Architecture** - Easy to add adapters for other ecosystems
-
-✅ **Changelog Generation** - Automatic per-module changelog generation (to be added)
-
-✅ **Pre-release Support** - Generate alpha, beta, rc, or custom pre-release versions
-
+✅ **Conventional Commits Parsing** - Automatically determines version bumps based on commit messages<br>
+✅ **Multi-Module Support** - Each module can be versioned independently<br>
+✅ **Dependency Cascade** - When a dependency changes, dependents are automatically bumped<br>
+✅ **Gradle Adapter** - First-class support for Gradle (Groovy & Kotlin DSL)<br>
+✅ **Extensible Architecture** - Easy to add adapters for other ecosystems<br>
+✅ **Changelog Generation** - Automatic per-module changelog generation (to be added)<br>
+✅ **Pre-release Support** - Generate alpha, beta, rc, or custom pre-release versions<br>
 ✅ **Multiple Interfaces** - Use as a library, CLI tool, or GitHub Action
 
 ## 📦 Packages
