@@ -65,12 +65,12 @@ export default class Version extends Command {
     "push-changes": Flags.boolean({
       description: "Commit and push version changes and changelogs to remote",
       default: true,
-      allowNo: true, 
+      allowNo: true,
     }),
     "generate-changelog": Flags.boolean({
       description: "Generate or update changelog files for changed modules",
       default: true,
-      allowNo: true, 
+      allowNo: true,
     }),
   };
 
