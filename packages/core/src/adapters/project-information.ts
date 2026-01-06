@@ -24,7 +24,7 @@ export type Module = {
 
   /** Whether the version is explicitly declared in build configuration (vs inherited). */
   readonly declaredVersion: boolean;
-};
+} & Record<string, unknown>;
 
 /**
  * Structured representation of project information after processing.

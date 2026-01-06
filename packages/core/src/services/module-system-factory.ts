@@ -1,4 +1,5 @@
 import { ModuleDetector } from "./module-detector.js";
+import { ModuleRegistry } from "./module-registry.js";
 import { VersionUpdateStrategy } from "./version-update-strategy.js";
 
 /**
@@ -21,5 +22,7 @@ export interface ModuleSystemFactory {
    *
    * @returns {@link VersionUpdateStrategy} configured for this build system
    */
-  createVersionUpdateStrategy(): VersionUpdateStrategy;
+  createVersionUpdateStrategy(
+    moduleRegistry: ModuleRegistry,
+  ): VersionUpdateStrategy;
 }

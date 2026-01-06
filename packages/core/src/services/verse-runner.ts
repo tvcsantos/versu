@@ -234,7 +234,7 @@ export class VerseRunner {
 
     // Create version manager
     const versionUpdateStrategy =
-      this.moduleSystemFactory.createVersionUpdateStrategy();
+      this.moduleSystemFactory.createVersionUpdateStrategy(this.moduleRegistry);
     this.versionManager = new VersionManager(
       this.moduleRegistry,
       versionUpdateStrategy,

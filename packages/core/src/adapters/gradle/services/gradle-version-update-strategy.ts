@@ -1,8 +1,8 @@
 import { join } from 'path';
 import { VersionUpdateStrategy } from "../../../services/version-update-strategy.js";
-import { moduleIdToVersionPropertyName } from '../gradle-properties.js';
 import { upsertProperties } from '../../../utils/properties.js';
 import { GRADLE_PROPERTIES_FILE } from '../constants.js';
+import { ModuleRegistry } from '../../../services/module-registry.js';
 
 /**
  * Gradle-specific implementation for version update operations.
@@ -16,7 +16,7 @@ export class GradleVersionUpdateStrategy implements VersionUpdateStrategy {
    * Creates a new Gradle version update strategy.
    * @param repoRoot - Absolute path to the repository root directory
    */
-  constructor(repoRoot: string) {
+  constructor(repoRoot: string, private readonly moduleRegistry: ModuleRegistry) {
     this.versionFilePath = join(repoRoot, GRADLE_PROPERTIES_FILE);
   }
   
@@ -31,8 +31,10 @@ export class GradleVersionUpdateStrategy implements VersionUpdateStrategy {
     const propertyUpdates = new Map<string, string>();
     
     for (const [moduleId, versionString] of moduleVersions) {
-      const propertyName = moduleIdToVersionPropertyName(moduleId);
+      const module = this.moduleRegistry.getModule(moduleId);
+      const propertyName = module['versionProperty'] as string;
       propertyUpdates.set(propertyName, versionString);
+    
     }
     
     // Write all properties to gradle.properties file in one atomic operation

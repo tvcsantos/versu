@@ -1,3 +1,4 @@
+<!-- markdownlint-disable-next-line MD041 -->
 ![μVERSE - Version Engine for Repo Semantic Evolution](docs/assets/images/muverse.png)
 
 # μVERSE - Version Engine for Repo Semantic Evolution
@@ -8,6 +9,7 @@ A semantic versioning engine for monorepos that uses Conventional Commits to aut
 
 ## Key Features
 
+<!-- markdownlint-disable MD033 -->
 ✅ **Conventional Commits Parsing** - Automatically determines version bumps based on commit messages<br>
 ✅ **Multi-Module Support** - Each module can be versioned independently<br>
 ✅ **Dependency Cascade** - When a dependency changes, dependents are automatically bumped<br>
@@ -16,6 +18,7 @@ A semantic versioning engine for monorepos that uses Conventional Commits to aut
 ✅ **Changelog Generation** - Automatic per-module changelog generation (to be added)<br>
 ✅ **Pre-release Support** - Generate alpha, beta, rc, or custom pre-release versions<br>
 ✅ **Multiple Interfaces** - Use as a library, CLI tool, or GitHub Action
+<!-- markdownlint-enable MD033 -->
 
 ## 📦 Packages
 
@@ -43,7 +46,7 @@ GitHub Actions integration for automated versioning in workflow pipelines.
 
 μVERSE uses [Conventional Commits](https://conventionalcommits.org/) to automatically determine version bumps:
 
-```
+```text
 <type>[optional scope]: <description>
 
 [optional body]
@@ -52,6 +55,7 @@ GitHub Actions integration for automated versioning in workflow pipelines.
 ```
 
 **Examples (default configuration):**
+
 - `feat(api): add new endpoint` → **minor** bump
 - `fix(core): resolve memory leak` → **patch** bump  
 - `feat!: breaking API change` → **major** bump
@@ -80,16 +84,16 @@ npm test       # Run tests
 
 ### Monorepo Structure
 
-```
+```text
 packages/
-├── core/      # Core library (@muverse/core)
+├── core/                # Core library (@muverse/core)
 │   └── src/
 │       ├── adapters/    # Project type adapters (Gradle, etc.)
 │       ├── services/    # Core services (versioning, git, changelog)
 │       └── config/      # Configuration system
-├── cli/       # CLI tool (@muverse/cli)
+├── cli/                 # CLI tool (@muverse/cli)
 │   └── src/
-└── action/    # GitHub Action (@muverse/action)
+└── action/              # GitHub Action (@muverse/action)
     └── src/
 ```
 

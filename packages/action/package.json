@@ -1,6 +1,6 @@
 {
   "name": "@muverse/action",
-  "version": "0.1.9",
+  "version": "0.1.10",
   "description": "Version Engine for Repo Semantic Evolution (GitHub Action)",
   "main": "dist/index.js",
   "private": true,
@@ -38,7 +38,7 @@
     "@actions/core": "^1.10.1",
     "@actions/exec": "^1.1.1",
     "@actions/github": "^6.0.0",
-    "@muverse/core": "^0.1.9"
+    "@muverse/core": "^0.1.10"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^28.0.8",

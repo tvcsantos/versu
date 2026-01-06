@@ -21,11 +21,11 @@ export class VersionManager {
   /**
    * Creates a new VersionManager.
    *
-   * @param hierarchyManager - Module registry for validation
+   * @param moduleRegistry - Module registry for validation
    * @param strategy - Build system-specific strategy for writing updates
    */
   constructor(
-    private readonly hierarchyManager: ModuleRegistry,
+    private readonly moduleRegistry: ModuleRegistry,
     private readonly strategy: VersionUpdateStrategy,
   ) {}
 
@@ -38,7 +38,7 @@ export class VersionManager {
    */
   updateVersion(moduleId: string, newVersion: SemVer | string): void {
     // Validate module exists in registry
-    if (!this.hierarchyManager.hasModule(moduleId)) {
+    if (!this.moduleRegistry.hasModule(moduleId)) {
       throw new Error(`Module ${moduleId} not found`);
     }
 

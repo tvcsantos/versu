@@ -3,6 +3,7 @@ import { ModuleDetector } from "../../../services/module-detector.js";
 import { VersionUpdateStrategy } from "../../../services/version-update-strategy.js";
 import { GradleModuleDetector } from './gradle-module-detector.js';
 import { GradleVersionUpdateStrategy } from './gradle-version-update-strategy.js';
+import { ModuleRegistry } from "../../../services/module-registry.js";
 
 /**
  * Factory for creating Gradle-specific module system components.
@@ -24,7 +25,7 @@ export class GradleModuleSystemFactory implements ModuleSystemFactory {
    * Creates a Gradle-specific version update strategy.
    * @returns GradleVersionUpdateStrategy instance configured with the repository root
    */
-  createVersionUpdateStrategy(): VersionUpdateStrategy {
-    return new GradleVersionUpdateStrategy(this.repoRoot);
+  createVersionUpdateStrategy(moduleRegistry: ModuleRegistry): VersionUpdateStrategy {
+    return new GradleVersionUpdateStrategy(this.repoRoot, moduleRegistry);
   }
 }

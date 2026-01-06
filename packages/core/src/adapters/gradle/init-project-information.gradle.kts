@@ -2,13 +2,20 @@ import groovy.json.JsonOutput
 import groovy.json.JsonGenerator
 
 /**
- * Computes the qualified property name for a project's version in gradle.properties.
- * Returns "version" for root, "{name}.version" for subprojects.
+ * Computes the qualified version property name for the project.
+ * Checks for "<projectName>.version" first, then falls back to "version".
  */
 fun Project.qualifiedVersionProperty(): String {
-    val name = if (path.contains(":")) path.split(':').last() else ""
-    return if (name.isEmpty()) "version" else "${name}.version"
+    val candidates = listOf("${name}.version", "version")
+    return candidates.firstOrNull(::hasProperty) ?: "version"
 }
+
+/**
+ * Retrieves the qualified version value for the project.
+ * Uses the qualified version property name to find the property value.
+ */
+fun Project.qualifiedVersion(): String =
+    qualifiedVersionProperty().run(::findProperty) as String
 
 gradle.rootProject {
     /**
@@ -79,8 +86,8 @@ gradle.rootProject {
                 val path = if (relativePath.isEmpty()) "." else relativePath
                 val version = if (project.version == "unspecified") null else project.version
                 val type = if (project == gradle.rootProject) "root" else "module"
-                val versionPropertyKey = project.qualifiedVersionProperty()
-                val versionFromProperty = (project.findProperty(versionPropertyKey) as? String)?.takeIf {
+                val versionProperty = project.qualifiedVersionProperty()
+                val versionFromProperty = project.qualifiedVersion().takeIf {
                     it.isNotBlank() && it != "unspecified"
                 }
 
@@ -90,6 +97,7 @@ gradle.rootProject {
                     "type" to type,
                     "name" to project.name,
                     "declaredVersion" to (versionFromProperty != null)
+                    "versionProperty" to versionProperty
                 )
             }
             projectData
@@ -122,6 +130,7 @@ gradle.rootProject {
                     "type" to projectInfo["type"],
                     "name" to projectInfo["name"],
                     "declaredVersion" to projectInfo["declaredVersion"]
+                    "versionProperty" to projectInfo["versionProperty"]
                 )
             }
 
