@@ -4,6 +4,7 @@ import { exists } from '../../utils/file.js';
 import { Module, ProjectInformation, RawProjectInformation } from '../project-information.js';
 import { fileURLToPath } from 'url';
 import { execa } from 'execa';
+import fs from 'fs/promises';
 
 /**
  * Name of the Gradle wrapper script file.
@@ -60,8 +61,22 @@ export async function getRawProjectInformation(projectRoot: string): Promise<Raw
     );
   }
 
+  const file = join(projectRoot, 'build', 'project-information.json');
+
+  // Verify that the output file was created
+  const fileExists = await exists(file);
+  if (!fileExists) {
+    throw new Error(
+      `Expected output file not found at ${file}. ` +
+      `Ensure that the Gradle init script is correctly generating the project information.`
+    );
+  }
+
+  // Read the output file content
+  const projectInformation = await fs.readFile(file, 'utf-8');
+
   // Parse JSON output from Gradle
-  return JSON.parse(result.stdout.trim() || '{}');
+  return JSON.parse(projectInformation.trim() || '{}');
 }
 
 /**

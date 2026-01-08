@@ -25,6 +25,7 @@ gradle.rootProject {
     tasks.register("printProjectInformation") {
         group = "help"
         description = "Shows which subprojects are affected by changes (hierarchy + direct dependencies)."
+        notCompatibleWithConfigurationCache("uses project information at configuration time")
 
         // Capture hierarchy data at configuration time
         val hierarchyDepsProvider = provider {
@@ -58,7 +59,7 @@ gradle.rootProject {
                     // Check regular dependencies
                     config.dependencies.forEach { dep ->
                         if (dep is ProjectDependency) {
-                            directDeps.add(dep.dependencyProject.path)
+                            directDeps.add(dep.path)
                         }
                     }
 
@@ -83,7 +84,7 @@ gradle.rootProject {
 
             gradle.rootProject.allprojects.forEach { project ->
                 val relativePath = gradle.rootProject.projectDir.toPath().relativize(project.projectDir.toPath()).toString()
-                val path = if (relativePath.isEmpty()) "." else relativePath
+                val path = relativePath.ifEmpty { "." }
                 val version = if (project.version == "unspecified") null else project.version
                 val type = if (project == gradle.rootProject) "root" else "module"
                 val versionProperty = project.qualifiedVersionProperty()
@@ -138,7 +139,17 @@ gradle.rootProject {
                 .excludeNulls()
                 .build()
 
-            println(JsonOutput.prettyPrint(generator.toJson(result)))
+            val json = JsonOutput.prettyPrint(generator.toJson(result))
+
+            // Get output path from project property or use default
+            val outputPath = project.findProperty("projectInfoOutput") as? String
+                ?: "${layout.buildDirectory.asFile.get().path}/project-information.json"
+
+            val outputFile = file(outputPath)
+            outputFile.parentFile.mkdirs()
+            outputFile.writeText(json)
+
+            println("Project information written to: ${outputFile.absolutePath}")
         }
     }
 
