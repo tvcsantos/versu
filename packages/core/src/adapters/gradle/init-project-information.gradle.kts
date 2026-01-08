@@ -96,7 +96,7 @@ gradle.rootProject {
                     "version" to version,
                     "type" to type,
                     "name" to project.name,
-                    "declaredVersion" to (versionFromProperty != null)
+                    "declaredVersion" to (versionFromProperty != null),
                     "versionProperty" to versionProperty
                 )
             }
@@ -129,7 +129,7 @@ gradle.rootProject {
                     "version" to projectInfo["version"],
                     "type" to projectInfo["type"],
                     "name" to projectInfo["name"],
-                    "declaredVersion" to projectInfo["declaredVersion"]
+                    "declaredVersion" to projectInfo["declaredVersion"],
                     "versionProperty" to projectInfo["versionProperty"]
                 )
             }
