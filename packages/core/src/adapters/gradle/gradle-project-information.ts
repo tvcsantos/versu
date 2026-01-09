@@ -28,9 +28,9 @@ const GRADLE_INIT_SCRIPT = './init-project-information.gradle.kts'
 /**
  * Cached project information structure with hash for validation.
  */
-interface CachedProjectInformation {
+type CachedProjectInformation = {
   hash: string;
-  data: RawProjectInformation;
+  data: GradleProjectInformation;
 }
 
 /**
@@ -132,6 +132,12 @@ async function executeGradleScript(projectRoot: string, outputFile: string): Pro
 export async function getRawProjectInformation(projectRoot: string, outputFile: string): Promise<RawProjectInformation> {
   // Step 1: Check if project-information.json exists
   const fileExists = await exists(outputFile);
+
+  let data: GradleProjectInformation = {};
+  let executeScript = true;
+
+  // Compute hash of all Gradle build files
+  const currentHash = await computeGradleFilesHash(projectRoot);
   
   if (fileExists) {
     // Step 2: File exists, check cache validity
@@ -139,13 +145,11 @@ export async function getRawProjectInformation(projectRoot: string, outputFile: 
       const fileContent = await fs.readFile(outputFile, 'utf-8');
       const cachedData: CachedProjectInformation = JSON.parse(fileContent);
       
-      // Step 2.1 & 2.2: Compute hash of all Gradle build files
-      const currentHash = await computeGradleFilesHash(projectRoot);
-      
-      // Step 2.3 & 2.4: Compare hashes
+      // Step 2.1: Compare hashes
       if (cachedData.hash === currentHash) {
-        // Cache hit - return cached data
-        return cachedData.data;
+        // Cache hit - use cached data
+        executeScript = false;
+        data = cachedData.data;
       }
       
       // Cache miss - hash mismatch, need to regenerate
@@ -155,8 +159,14 @@ export async function getRawProjectInformation(projectRoot: string, outputFile: 
     }
   }
   
-  // Step 3: File doesn't exist or cache is invalid - execute Gradle script
-  await executeGradleScript(projectRoot, outputFile);
+  if (executeScript) {
+    // Step 3: File doesn't exist or cache is invalid - execute Gradle script
+    await executeGradleScript(projectRoot, outputFile);
+    // Read the output file content
+    const fileContent = await fs.readFile(outputFile, 'utf-8');
+    // Parse JSON output from Gradle
+    data = JSON.parse(fileContent.trim() || '{}');
+  }
 
   // Verify that the output file was created
   const fileExistsAfterExec = await exists(outputFile);
@@ -166,22 +176,15 @@ export async function getRawProjectInformation(projectRoot: string, outputFile: 
       `Ensure that the Gradle init script is correctly generating the project information.`
     );
   }
-
-  // Read the output file content
-  const projectInformationContent = await fs.readFile(outputFile, 'utf-8');
-
-  // Parse JSON output from Gradle
-  const gradleProjectInformation: GradleProjectInformation = JSON.parse(projectInformationContent.trim() || '{}');
-
-  // Read gradle.properites and add version
-  const projectInformation = await getInformationWithVersions(projectRoot, gradleProjectInformation);
   
   // Compute hash and save with cache information
-  const currentHash = await computeGradleFilesHash(projectRoot);
   const cachedData: CachedProjectInformation = {
     hash: currentHash,
-    data: projectInformation
+    data
   };
+
+  // Read gradle.properites and add version
+  const projectInformation = await getInformationWithVersions(projectRoot, data);
   
   // Write back to file with hash for future cache validation
   await fs.writeFile(outputFile, JSON.stringify(cachedData, null, 2), 'utf-8');
