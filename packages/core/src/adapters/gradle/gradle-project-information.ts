@@ -38,7 +38,7 @@ type CachedProjectInformation = {
  * Finds all Gradle build files recursively under the project root.
  * Searches for settings.gradle, settings.gradle.kts, build.gradle, and build.gradle.kts files.
  * @param projectRoot - Absolute path to the Gradle project root directory
- * @returns Promise resolving to array of absolute paths to Gradle build files
+ * @returns Promise resolving to array of relative paths to Gradle build files
  */
 async function findGradleFiles(projectRoot: string): Promise<string[]> {
   const patterns = [
@@ -50,7 +50,7 @@ async function findGradleFiles(projectRoot: string): Promise<string[]> {
 
   const files = await fg(patterns, {
     cwd: projectRoot,
-    absolute: true,
+    absolute: false,
     ignore: ['**/node_modules/**', '**/build/**', '**/.gradle/**']
   });
 
@@ -69,7 +69,7 @@ async function computeGradleFilesHash(projectRoot: string): Promise<string> {
   const hash = crypto.createHash('sha256');
 
   for (const file of files) {
-    const content = await fs.readFile(file, 'utf-8');
+    const content = await fs.readFile(join(projectRoot, file), 'utf-8');
     hash.update(file); // Include file path for uniqueness
     hash.update(content);
   }
