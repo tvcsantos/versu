@@ -142,6 +142,7 @@ export async function getRawProjectInformation(projectRoot: string, outputFile: 
 
   // Compute hash of all Gradle build files
   const currentHash = await computeGradleFilesHash(projectRoot);
+  logger.info(`🔍 Computed Gradle files hash: ${currentHash}`);
   
   if (fileExists) {
     logger.info(`💾 Cached project information found at ${outputFile}. Validating cache...`);
@@ -157,6 +158,7 @@ export async function getRawProjectInformation(projectRoot: string, outputFile: 
         executeScript = false;
         data = cachedData.data;
       } else {
+        logger.info(`❌ Cache is invalid. Cached hash: ${cachedData.hash}`);
         logger.info(`🔄 Gradle files changed, regenerating project information...`);
       }
       
