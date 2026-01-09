@@ -8,34 +8,40 @@ import { exists } from "./file.js";
  * @param propertiesPath - Path to the properties file
  * @returns Map of property keys to values
  */
-export async function parseProperties(propertiesPath: string): Promise<Map<string, string>> {
-  const content = await fs.readFile(propertiesPath, 'utf8');
+export async function parseProperties(
+  propertiesPath: string,
+): Promise<Map<string, string>> {
+  const content = await fs.readFile(propertiesPath, "utf8");
   const properties = new Map<string, string>();
-  
+
   // Parse all properties line by line
-  const lines = content.split('\n');
-  
+  const lines = content.split("\n");
+
   for (const line of lines) {
     const trimmedLine = line.trim();
-    
+
     // Skip comments and empty lines
-    if (trimmedLine.startsWith('#') || trimmedLine.startsWith('!') || !trimmedLine) {
+    if (
+      trimmedLine.startsWith("#") ||
+      trimmedLine.startsWith("!") ||
+      !trimmedLine
+    ) {
       continue;
     }
-    
+
     // Parse property: key=value or key:value
     const match = trimmedLine.match(/^([^=:]+)[=:]\s*(.+)$/);
     if (!match) {
       continue;
     }
-    
+
     const [, key, value] = match;
     const trimmedKey = key.trim();
     const trimmedValue = value.trim();
-    
+
     properties.set(trimmedKey, trimmedValue);
   }
-  
+
   return properties;
 }
 

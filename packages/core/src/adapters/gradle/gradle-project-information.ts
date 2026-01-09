@@ -1,7 +1,7 @@
 import path, { join } from 'path';
 import { createInitialVersion, parseSemVer } from '../../semver/index.js';
 import { exists } from '../../utils/file.js';
-import { BaseModule, Module, ProjectInformation, RawModule, RawProjectInformation } from '../project-information.js';
+import { BaseModule, Module, ProjectInformation, RawProjectInformation } from '../project-information.js';
 import { fileURLToPath } from 'url';
 import { execa } from 'execa';
 import fs from 'fs/promises';
