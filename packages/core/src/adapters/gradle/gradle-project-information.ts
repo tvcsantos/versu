@@ -171,6 +171,7 @@ export async function getRawProjectInformation(projectRoot: string, outputFile: 
   
   if (executeScript) {
     // Step 3: File doesn't exist or cache is invalid - execute Gradle script
+    const outputFile = join(projectRoot, 'build', 'project-information.json');
     await executeGradleScript(projectRoot, outputFile);
     // Read the output file content
     const fileContent = await fs.readFile(outputFile, 'utf-8');
@@ -196,7 +197,7 @@ export async function getRawProjectInformation(projectRoot: string, outputFile: 
   // Read gradle.properites and add version
   const projectInformation = await getInformationWithVersions(projectRoot, data);
 
-  if (!executeScript) {
+  if (executeScript) {
     // Write back to file with hash for future cache validation
     await fs.writeFile(outputFile, JSON.stringify(cachedData, null, 2), 'utf-8');
   }
