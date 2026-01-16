@@ -7,6 +7,7 @@
 import { CommitParser } from "conventional-commits-parser";
 import { logger } from "../utils/logger.js";
 import { execa } from "execa";
+import { Module } from "../index.js";
 
 /**
  * Shared CommitParser instance for parsing conventional commits.
@@ -95,38 +96,42 @@ export type CommitInfo = {
 /**
  * Retrieves all commits for a module since its last release tag.
  * Handles monorepo and single-repo scenarios with path filtering.
- * @param modulePath - Relative path to module from repository root (use '.' for root)
- * @param moduleName - Module name used for tag searching
- * @param moduleType - 'root' for general tags, 'module' for module-specific tags
+ * @param projectInfo - Module information including path and type
  * @param options - Git operation options
  * @param excludePaths - Paths to exclude using git pathspec syntax
  * @returns Promise resolving to array of parsed commits (oldest to newest)
  */
 export async function getCommitsSinceLastTag(
-  modulePath: string,
-  moduleName: string,
-  moduleType: "root" | "module",
+  projectInfo: Module,
   options: GitOptions = {},
   excludePaths: string[] = [],
 ): Promise<CommitInfo[]> {
   // Resolve the working directory, defaulting to current process directory
   const cwd = options.cwd || process.cwd();
 
+  logger.debug(
+    `🔍 Getting commits for module '${projectInfo.name}' at path '${projectInfo.path}' since last tag...`,
+  );
+
   try {
     // Find the most recent tag for this module
     // For root modules, this finds general tags (v1.0.0)
     // For submodules, this finds module-specific tags (module@1.0.0)
-    const lastTag = await getLastTagForModule(moduleName, moduleType, { cwd });
+    const lastTag = await getLastTagForModule(projectInfo, { cwd });
+
+    logger.debug(
+      `🔍 Last tag for module '${projectInfo.name}' of type '${projectInfo.type}': ${lastTag}`,
+    );
 
     // Build the git revision range
     // If tag exists: 'tag..HEAD' means commits after tag up to HEAD
     // If no tag: empty string means all commits in history
     const range = lastTag ? `${lastTag}..HEAD` : "";
-    return getCommitsInRange(range, modulePath, { cwd }, excludePaths);
+    return getCommitsInRange(range, projectInfo.path, { cwd }, excludePaths);
   } catch (error) {
     // If tag lookup fails for any reason, fall back to all commits
     // This ensures we always have commit history for version determination
-    return getCommitsInRange("", modulePath, { cwd }, excludePaths);
+    return getCommitsInRange("", projectInfo.path, { cwd }, excludePaths);
   }
 }
 
@@ -147,6 +152,10 @@ export async function getCommitsInRange(
 ): Promise<CommitInfo[]> {
   // Resolve working directory, defaulting to current directory
   const cwd = options.cwd || process.cwd();
+
+  logger.debug(
+    `🔍 Getting commits in range '${range}' with path filter '${pathFilter}' and excluding paths: ${excludePaths.join(", ")}`,
+  );
 
   try {
     // Build git log command with custom format for easy parsing
@@ -177,6 +186,8 @@ export async function getCommitsInRange(
         args.push(`:(exclude)${excludePath}`);
       }
     }
+
+    logger.debug(`🐙 Executing git command: git ${args.join(" ")}`);
 
     // Execute git log command
     // Silent mode prevents output pollution in GitHub Actions
@@ -271,28 +282,35 @@ function parseGitLog(output: string): CommitInfo[] {
 /**
  * Finds the most recent git tag for a specific module with fallback to general tags.
  * Searches module-specific tags first (moduleName@*), then falls back to general tags.
- * @param moduleName - Module name for tag pattern construction
- * @param moduleType - 'root' skips module tags, 'module' tries module tags first
+ * @param projectInfo - Module information for tag pattern construction
  * @param options - Git operation options
  * @returns Most recent tag name or null if no tags exist
  */
 export async function getLastTagForModule(
-  moduleName: string,
-  moduleType: "root" | "module",
+  projectInfo: Module,
   options: GitOptions = {},
 ): Promise<string | null> {
   // Resolve working directory, defaulting to current directory
   const cwd = options.cwd || process.cwd();
 
+  logger.debug(
+    `🔍 Finding last tag for module '${projectInfo.name}' of type '${projectInfo.type}'...`,
+  );
+
   try {
     // Generate glob pattern for module-specific tags (e.g., 'api@*')
-    const moduleTagPattern = getModuleTagPattern(moduleName);
+    const moduleTagPattern = getModuleTagPattern(projectInfo.name);
 
-    // Only search for module-specific tags if it's not root
+    // Only search for module-specific tags if it's not root and version is declared
     // Root projects use general tags (v1.0.0) rather than module tags (root@1.0.0)
-    if (moduleType !== "root") {
+    if (projectInfo.type !== "root" && projectInfo.declaredVersion) {
       // Search for module-specific tags with version sorting
       // --sort=-version:refname: Sort by version in descending order (newest first)
+
+      logger.debug(
+        `🐙 Executing git command: git tag -l ${moduleTagPattern} --sort=-version:refname`,
+      );
+
       const { stdout } = await execa(
         "git",
         ["tag", "-l", moduleTagPattern, "--sort=-version:refname"],
@@ -314,6 +332,11 @@ export async function getLastTagForModule(
       // git describe finds the most recent tag reachable from HEAD
       // --tags: Consider all tags (not just annotated)
       // --abbrev=0: Don't show commit hash suffix
+
+      logger.debug(
+        `🐙 Executing git command: git describe --tags --abbrev=0 HEAD`,
+      );
+
       const { stdout: fallbackOutput } = await execa(
         "git",
         ["describe", "--tags", "--abbrev=0", "HEAD"],
@@ -349,6 +372,11 @@ export async function getAllTags(options: GitOptions = {}): Promise<GitTag[]> {
     // List all tags with custom format to get name and commit hash
     // %(refname:short): Tag name without refs/tags/ prefix
     // %(objectname): Full commit SHA that the tag points to
+
+    logger.debug(
+      `🐙 Executing git command: git tag -l --format=%(refname:short) %(objectname)`,
+    );
+
     const { stdout } = await execa(
       "git",
       ["tag", "-l", "--format=%(refname:short) %(objectname)"],

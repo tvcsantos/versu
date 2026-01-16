@@ -43,9 +43,7 @@ export class CommitAnalyzer {
 
       // Retrieve commits for this module, excluding child modules
       const commits = await getCommitsSinceLastTag(
-        projectInfo.path,
-        projectInfo.name,
-        projectInfo.type,
+        projectInfo,
         { cwd: this.repoRoot },
         childModulePaths,
       );
@@ -83,6 +81,10 @@ export class CommitAnalyzer {
   private findChildModulePaths(modulePath: string, moduleId: string): string[] {
     const childPaths: string[] = [];
 
+    logger.debug(
+      `🔎 Finding child modules for ${moduleId} at path '${modulePath}'`,
+    );
+
     // Iterate through all modules to find children
     for (const [otherId, otherInfo] of this.moduleRegistry.getModules()) {
       // Skip the module itself
@@ -93,6 +95,12 @@ export class CommitAnalyzer {
         childPaths.push(otherInfo.path);
       }
     }
+
+    logger.debug(
+      `✅ Found ${childPaths.length} child module(s) for ${moduleId}`,
+    );
+
+    logger.debug(`Child module paths: ${childPaths.join(", ")}`);
 
     return childPaths;
   }
