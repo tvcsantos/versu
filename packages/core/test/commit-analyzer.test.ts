@@ -72,17 +72,17 @@ describe('CommitAnalyzer - Child Module Exclusion', () => {
 
       // Mock getCommitsSinceLastTag to return different commits based on excludePaths
       vi.mocked(gitIndex.getCommitsSinceLastTag).mockImplementation(
-        async (modulePath, moduleName, moduleType, options, excludePaths = []) => {
-          if (modulePath === './core') {
+        async (projectInfo, options, excludePaths = []) => {
+          if (projectInfo.path === './core') {
             // Core should have called with exclusions for api and impl
             expect(excludePaths).toContain('./core/api');
             expect(excludePaths).toContain('./core/impl');
             return coreCommits;
-          } else if (modulePath === './core/api') {
+          } else if (projectInfo.path === './core/api') {
             // API has no child modules
             expect(excludePaths).toEqual([]);
             return apiCommits;
-          } else if (modulePath === './core/impl') {
+          } else if (projectInfo.path === './core/impl') {
             // Impl has no child modules
             expect(excludePaths).toEqual([]);
             return implCommits;
@@ -141,18 +141,18 @@ describe('CommitAnalyzer - Child Module Exclusion', () => {
       moduleRegistry = new ModuleRegistry(hierarchyResult);
 
       vi.mocked(gitIndex.getCommitsSinceLastTag).mockImplementation(
-        async (modulePath, moduleName, moduleType, options, excludePaths = []) => {
-          if (modulePath === './services') {
+        async (projectInfo, options, excludePaths = []) => {
+          if (projectInfo.path === './services') {
             // Services should exclude both api and api/v1
             expect(excludePaths).toContain('./services/api');
             expect(excludePaths).toContain('./services/api/v1');
             return [{ hash: 'svc123', type: 'feat', subject: 'service update', breaking: false }];
-          } else if (modulePath === './services/api') {
+          } else if (projectInfo.path === './services/api') {
             // API should exclude only v1
             expect(excludePaths).toContain('./services/api/v1');
             expect(excludePaths).not.toContain('./services/api');
             return [{ hash: 'api456', type: 'fix', subject: 'api fix', breaking: false }];
-          } else if (modulePath === './services/api/v1') {
+          } else if (projectInfo.path === './services/api/v1') {
             // V1 has no children
             expect(excludePaths).toEqual([]);
             return [{ hash: 'v1789', type: 'feat', subject: 'v1 feature', breaking: false }];
@@ -212,8 +212,8 @@ describe('CommitAnalyzer - Child Module Exclusion', () => {
       ];
 
       vi.mocked(gitIndex.getCommitsSinceLastTag).mockImplementation(
-        async (modulePath, moduleName, moduleType, options, excludePaths = []) => {
-          if (modulePath === '.') {
+        async (projectInfo, options, excludePaths = []) => {
+          if (projectInfo.path === '.') {
             // Root should exclude all submodules
             expect(excludePaths).toContain('./core');
             expect(excludePaths).toContain('./utils');
@@ -269,13 +269,13 @@ describe('CommitAnalyzer - Child Module Exclusion', () => {
       ];
 
       vi.mocked(gitIndex.getCommitsSinceLastTag).mockImplementation(
-        async (modulePath, moduleName, moduleType, options, excludePaths = []) => {
+        async (projectInfo, options, excludePaths = []) => {
           // Neither module has child modules, so excludePaths should be empty
           expect(excludePaths).toEqual([]);
           
-          if (modulePath === './utils') {
+          if (projectInfo.path === './utils') {
             return utilsCommits;
-          } else if (modulePath === './services') {
+          } else if (projectInfo.path === './services') {
             return servicesCommits;
           }
           return [];
