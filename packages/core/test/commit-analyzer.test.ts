@@ -3,8 +3,8 @@ import { CommitAnalyzer } from '../src/services/commit-analyzer.js';
 import * as gitIndex from '../src/git/index.js';
 import { parseSemVer } from '../src/semver/index.js';
 import { ModuleRegistry } from '../src/services/module-registry.js';
-import { CommitInfo } from '../src/git/index.js';
 import { Module, ProjectInformation } from '../src/adapters/project-information.js';
+import { Commit } from 'conventional-commits-parser';
 
 // Mock the git module
 vi.mock('../src/git/index.js', () => ({
@@ -60,14 +60,14 @@ describe('CommitAnalyzer - Child Module Exclusion', () => {
       moduleRegistry = new ModuleRegistry(hierarchyResult);
 
       // Mock commits - git will handle exclusion natively
-      const coreCommits: CommitInfo[] = [
-        { hash: 'ghi789', type: 'feat', subject: 'add core feature', breaking: false },
+      const coreCommits: Commit[] = [
+        { hash: 'ghi789', type: 'feat', subject: 'add core feature' } as unknown as Commit,
       ];
-      const apiCommits: CommitInfo[] = [
-        { hash: 'abc123', type: 'feat', subject: 'add api feature', breaking: false },
+      const apiCommits: Commit[] = [
+        { hash: 'abc123', type: 'feat', subject: 'add api feature' } as unknown as Commit,
       ];
-      const implCommits: CommitInfo[] = [
-        { hash: 'def456', type: 'fix', subject: 'fix impl bug', breaking: false },
+      const implCommits: Commit[] = [
+        { hash: 'def456', type: 'fix', subject: 'fix impl bug' } as unknown as Commit,
       ];
 
       // Mock getCommitsSinceLastTag to return different commits based on excludePaths
@@ -77,17 +77,17 @@ describe('CommitAnalyzer - Child Module Exclusion', () => {
             // Core should have called with exclusions for api and impl
             expect(excludePaths).toContain('./core/api');
             expect(excludePaths).toContain('./core/impl');
-            return coreCommits;
+            return { commits: coreCommits, lastTag: null };
           } else if (projectInfo.path === './core/api') {
             // API has no child modules
             expect(excludePaths).toEqual([]);
-            return apiCommits;
+            return { commits: apiCommits, lastTag: null };
           } else if (projectInfo.path === './core/impl') {
             // Impl has no child modules
             expect(excludePaths).toEqual([]);
-            return implCommits;
+            return { commits: implCommits, lastTag: null };
           }
-          return [];
+          return { commits: [], lastTag: null };
         }
       );
 
@@ -96,9 +96,9 @@ describe('CommitAnalyzer - Child Module Exclusion', () => {
       const result = await commitAnalyzer.analyzeCommitsSinceLastRelease();
 
       // Verify each module got the correct commits
-      expect(result.get(':core')).toEqual(coreCommits);
-      expect(result.get(':core:api')).toEqual(apiCommits);
-      expect(result.get(':core:impl')).toEqual(implCommits);
+      expect(result.get(':core')).toEqual({commits: coreCommits, lastTag: null});
+      expect(result.get(':core:api')).toEqual({commits: apiCommits, lastTag: null});
+      expect(result.get(':core:impl')).toEqual({commits: implCommits, lastTag: null});
     });
 
     it('should handle multi-level nested modules correctly', async () => {
@@ -146,18 +146,18 @@ describe('CommitAnalyzer - Child Module Exclusion', () => {
             // Services should exclude both api and api/v1
             expect(excludePaths).toContain('./services/api');
             expect(excludePaths).toContain('./services/api/v1');
-            return [{ hash: 'svc123', type: 'feat', subject: 'service update', breaking: false }];
+            return { commits: [{ hash: 'svc123', type: 'feat', subject: 'service update' } as unknown as Commit], lastTag: null };
           } else if (projectInfo.path === './services/api') {
             // API should exclude only v1
             expect(excludePaths).toContain('./services/api/v1');
             expect(excludePaths).not.toContain('./services/api');
-            return [{ hash: 'api456', type: 'fix', subject: 'api fix', breaking: false }];
+            return { commits: [{ hash: 'api456', type: 'fix', subject: 'api fix' } as unknown as Commit], lastTag: null };
           } else if (projectInfo.path === './services/api/v1') {
             // V1 has no children
             expect(excludePaths).toEqual([]);
-            return [{ hash: 'v1789', type: 'feat', subject: 'v1 feature', breaking: false }];
+            return { commits: [{ hash: 'v1789', type: 'feat', subject: 'v1 feature' } as unknown as Commit], lastTag: null };
           }
-          return [];
+          return { commits: [], lastTag: null };
         }
       );
 
@@ -207,8 +207,8 @@ describe('CommitAnalyzer - Child Module Exclusion', () => {
 
       moduleRegistry = new ModuleRegistry(hierarchyResult);
 
-      const rootCommits: CommitInfo[] = [
-        { hash: 'root123', type: 'feat', subject: 'update root build file', breaking: false },
+      const rootCommits: Commit[] = [
+        { hash: 'root123', type: 'feat', subject: 'update root build file' } as unknown as Commit,
       ];
 
       vi.mocked(gitIndex.getCommitsSinceLastTag).mockImplementation(
@@ -218,9 +218,9 @@ describe('CommitAnalyzer - Child Module Exclusion', () => {
             expect(excludePaths).toContain('./core');
             expect(excludePaths).toContain('./utils');
             expect(excludePaths.length).toBe(2);
-            return rootCommits;
+            return { commits: rootCommits, lastTag: null };
           }
-          return [];
+          return { commits: [], lastTag: null };
         }
       );
 
@@ -228,7 +228,7 @@ describe('CommitAnalyzer - Child Module Exclusion', () => {
       const result = await commitAnalyzer.analyzeCommitsSinceLastRelease();
 
       // Root should have its commits with all submodules excluded
-      expect(result.get(':')).toEqual(rootCommits);
+      expect(result.get(':')).toEqual({commits: rootCommits, lastTag: null});
     });
 
     it('should handle modules with no child modules (no exclusions)', async () => {
@@ -261,11 +261,11 @@ describe('CommitAnalyzer - Child Module Exclusion', () => {
 
       moduleRegistry = new ModuleRegistry(hierarchyResult);
 
-      const utilsCommits: CommitInfo[] = [
-        { hash: 'utils123', type: 'feat', subject: 'add util', breaking: false },
+      const utilsCommits: Commit[] = [
+        { hash: 'utils123', type: 'feat', subject: 'add util' } as unknown as Commit,
       ];
-      const servicesCommits: CommitInfo[] = [
-        { hash: 'svc456', type: 'fix', subject: 'fix service', breaking: false },
+      const servicesCommits: Commit[] = [
+        { hash: 'svc456', type: 'fix', subject: 'fix service' } as unknown as Commit,
       ];
 
       vi.mocked(gitIndex.getCommitsSinceLastTag).mockImplementation(
@@ -274,11 +274,11 @@ describe('CommitAnalyzer - Child Module Exclusion', () => {
           expect(excludePaths).toEqual([]);
           
           if (projectInfo.path === './utils') {
-            return utilsCommits;
+            return { commits: utilsCommits, lastTag: null };
           } else if (projectInfo.path === './services') {
-            return servicesCommits;
+            return { commits: servicesCommits, lastTag: null };
           }
-          return [];
+          return { commits: [], lastTag: null };
         }
       );
 
@@ -286,8 +286,8 @@ describe('CommitAnalyzer - Child Module Exclusion', () => {
       const result = await commitAnalyzer.analyzeCommitsSinceLastRelease();
 
       // Both modules should get their commits without any filtering
-      expect(result.get(':utils')).toEqual(utilsCommits);
-      expect(result.get(':services')).toEqual(servicesCommits);
+      expect(result.get(':utils')).toEqual({commits: utilsCommits, lastTag: null});
+      expect(result.get(':services')).toEqual({commits: servicesCommits, lastTag: null});
     });
   });
 });
