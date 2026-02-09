@@ -25,10 +25,10 @@ export class ChangelogGenerator {
 
     logger.info("📚 Generating changelogs...");
 
-    if (this.options.dryRun) {
+    /*if (this.options.dryRun) {
       logger.info("🏃‍♂️ Dry run mode - changelogs will not be written to files");
       return [];
-    }
+    }*/
 
     // Generate individual module changelogs
     const changelogPaths = await generateChangelogsForModules(

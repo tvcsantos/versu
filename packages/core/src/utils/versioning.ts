@@ -17,3 +17,7 @@ export function applySnapshotSuffix(version: string): string {
   // Append the snapshot suffix to mark this as a development version
   return `${version}${SNAPSHOT_SUFFIX}`;
 }
+
+export function isSnapshotVersion(version: string): boolean {
+  return version.endsWith(SNAPSHOT_SUFFIX);
+}

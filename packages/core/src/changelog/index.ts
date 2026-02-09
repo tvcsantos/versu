@@ -6,6 +6,7 @@ import { logger } from "../utils/logger.js";
 import { Commit } from "conventional-commits-parser";
 import { exists } from "../utils/file.js";
 import { getCurrentRepoUrl, GitOptions, parseRepoUrl } from "../git/index.js";
+import { isReleaseVersion } from "../semver/index.js";
 
 /** Update or create a changelog file for a module. */
 export async function updateChangelogFile(
@@ -18,7 +19,7 @@ export async function updateChangelogFile(
     logger.info(`Updating existing changelog at ${changelogPath}...`);
     // Try to read existing changelog
     const existingContent = await fs.readFile(changelogPath, "utf8");
-    const newContent = prependPlaceholder + "\n\n" + changelogContent;
+    const newContent = `${prependPlaceholder}\n\n${changelogContent.trimEnd()}`;
 
     fileContent = existingContent.replace(prependPlaceholder, newContent);
   }
@@ -77,6 +78,13 @@ export async function generateChangelogsForModules(
   const contextRepository = await buildContextRepository({ cwd: repoRoot });
 
   for (const moduleResult of moduleResults) {
+    if (!moduleResult.declaredVersion) {
+      logger.info(
+        `Module ${moduleResult.id} has no declared version, skipping changelog generation...`,
+      );
+      continue;
+    }
+
     const { commits, lastTag } = await getCommitsForModule(moduleResult.id);
 
     if (commits.length === 0) {
@@ -93,10 +101,20 @@ export async function generateChangelogsForModules(
       prepend = false;
     }
 
+    const isRelease = isReleaseVersion(moduleResult.to);
+    const version = isRelease ? moduleResult.to : undefined;
+    const currentTag = isRelease
+      ? `${moduleResult.name}@${moduleResult.to}`
+      : undefined;
+    const previousTag = lastTag || undefined;
+
     const changelogContent = await writeChangelogString(
       commits,
       {
-        lastTag: lastTag || undefined,
+        version: version,
+        previousTag: previousTag,
+        currentTag: currentTag,
+        linkCompare: previousTag && currentTag ? true : false,
         ...contextRepository,
         ...userConfig.context,
         prepend,

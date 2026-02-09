@@ -225,3 +225,14 @@ export function generateTimestampPrereleaseId(
 
   return `${baseId}.${dateString}.${timeString}`;
 }
+
+export function isReleaseVersion(version: SemVer | string): boolean {
+  if (typeof version === "string") {
+    const parsed = semver.parse(version);
+    if (!parsed) return false;
+    version = parsed;
+  }
+
+  // A release version has no prerelease identifiers
+  return version.prerelease.length === 0;
+}
