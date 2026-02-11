@@ -1,7 +1,7 @@
 import { configSchema, type Config } from "../config/index.js";
 
 /**
- * Validates μVERSE configuration against Zod schema for type safety and correctness.
+ * Validates VERSU configuration against Zod schema for type safety and correctness.
  * Ensures all configuration values conform to expected types and constraints,
  * providing detailed error messages for any validation failures.
  */

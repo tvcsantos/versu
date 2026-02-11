@@ -1,19 +1,19 @@
-# @muverse/core - Core Library
+# @versu/core - Core Library
 
-The core business logic powering μVERSE (Version Engine for Repo Semantic Evolution). This package is completely framework-agnostic and can be integrated into any TypeScript/JavaScript project, CI/CD system, or custom tooling.
+The core business logic powering VERSU (Version Engine for Repo Semantic Evolution). This package is completely framework-agnostic and can be integrated into any TypeScript/JavaScript project, CI/CD system, or custom tooling.
 
 ## Installation
 
 ```bash
-npm install @muverse/core
+npm install @versu/core
 ```
 
 ## Quick Start
 
 ```typescript
-import { VerseRunner } from '@muverse/core';
+import { VersuRunner } from '@versu/core';
 
-const runner = new VerseRunner({
+const runner = new VersuRunner({
   repoRoot: '/path/to/repository',
   adapter: 'gradle', // Optional - auto-detected if not specified
   dryRun: false,
@@ -31,7 +31,7 @@ console.log(`Created tags:`, result.createdTags);
 
 For detailed pre-release configuration and examples, see [PRERELEASE.md](./PRERELEASE.md).
 
-## VerseRunner API
+## VersuRunner API
 
 ### Options
 
@@ -69,14 +69,14 @@ interface RunnerResult {
 
 ## Configuration
 
-μVERSE core uses [cosmiconfig](https://github.com/davidtheclark/cosmiconfig) for configuration loading and [Zod](https://github.com/colinhacks/zod) for validation.
+VERSU core uses [cosmiconfig](https://github.com/davidtheclark/cosmiconfig) for configuration loading and [Zod](https://github.com/colinhacks/zod) for validation.
 
 ### Supported Configuration Files
 
-1. `package.json` (in a `"muverse"` property)
-2. `.muverserc.json`
-3. `.muverserc.yaml` / `.muverserc.yml`
-4. `.muverserc.js` or `muverse.config.js` (JavaScript)
+1. `package.json` (in a `"versu"` property)
+2. `.versurc.json`
+3. `.versurc.yaml` / `.versurc.yml`
+4. `.versurc.js` or `versu.config.js` (JavaScript)
 
 ### Configuration Example
 
@@ -134,7 +134,7 @@ import {
   AdapterMetadata,
   RawProjectInformation,
   ProcessedModuleChange
-} from '@muverse/core';
+} from '@versu/core';
 
 // 1. Adapter identifier for auto-detection
 class MyAdapterIdentifier implements AdapterIdentifier {
@@ -228,8 +228,8 @@ npm publish --workspace packages/core --access public
 
 ## Related Packages
 
-- **[@muverse/cli](../cli)** - Command-line interface
-- **[@muverse/action](../action)** - GitHub Actions integration
+- **[@versu/cli](../cli)** - Command-line interface
+- **[@versu/action](../action)** - GitHub Actions integration
 
 ## Requirements
 

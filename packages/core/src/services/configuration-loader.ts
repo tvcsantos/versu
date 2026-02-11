@@ -5,7 +5,7 @@ import deepmerge from "deepmerge";
 import { ConfigurationValidator } from "./configuration-validator.js";
 
 /**
- * Loads and merges μVERSE configuration from various sources (.muverserc, muverse.config.js, package.json).
+ * Loads and merges VERSU configuration from various sources (.versu, versu.config.js, package.json).
  * Uses cosmiconfig for auto-discovery and merges user config with defaults.
  */
 export class ConfigurationLoader {
@@ -17,18 +17,18 @@ export class ConfigurationLoader {
    */
   constructor(private readonly configurationValidator: ConfigurationValidator) {
     // Initialize cosmiconfig explorer once for reuse across multiple loads
-    this.explorer = cosmiconfig("muverse");
+    this.explorer = cosmiconfig("versu");
   }
 
   /**
-   * Loads and validates the μVERSE configuration.
+   * Loads and validates the VERSU configuration.
    * @param repoRoot - Absolute path to the repository root directory
    * @returns A promise that resolves to the fully merged and validated configuration
    * @throws {Error} If configuration loading or validation fails
    */
   async load(repoRoot: string): Promise<Config> {
     try {
-      logger.info(`🔍 Searching for μVERSE configuration...`);
+      logger.info(`🔍 Searching for VERSU configuration...`);
 
       // Search for config in standard locations
       const result = await this.explorer.search(repoRoot);

@@ -6,7 +6,7 @@ export default defineConfig({
     globals: true,
     environment: 'node',
     env: {
-      GITHUB_ACTION_REPOSITORY: 'tvcsantos/muverse'
+      GITHUB_ACTION_REPOSITORY: 'tvcsantos/versu'
     },
     coverage: {
       provider: 'v8',

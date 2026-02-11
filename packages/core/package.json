@@ -1,6 +1,6 @@
 {
-  "name": "@muverse/core",
-  "version": "0.3.1",
+  "name": "@versu/core",
+  "version": "0.4.0",
   "description": "Version Engine for Repo Semantic Evolution (Core Library)",
   "type": "module",
   "main": "dist/index.js",
@@ -22,7 +22,7 @@
     "copy-assets": "cpx \"src/adapters/gradle/init-project-information.gradle.kts\" \"dist/adapters/gradle/\""
   },
   "keywords": [
-    "muverse",
+    "versu",
     "core",
     "semantic-versioning",
     "conventional-commits",
@@ -34,12 +34,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/tvcsantos/muverse.git"
+    "url": "git+https://github.com/tvcsantos/versu.git"
   },
   "bugs": {
-    "url": "https://github.com/tvcsantos/muverse/issues"
+    "url": "https://github.com/tvcsantos/versu/issues"
   },
-  "homepage": "https://github.com/tvcsantos/muverse#readme",
+  "homepage": "https://github.com/tvcsantos/versu#readme",
   "files": [
     "dist"
   ],

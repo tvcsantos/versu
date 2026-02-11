@@ -1,8 +1,8 @@
 import { Command } from '@oclif/core';
-import type { Logger } from '@muverse/core';
+import type { Logger } from '@versu/core';
 import Debug from 'debug';
 
-const debug = Debug('muverse');
+const debug = Debug('versu');
 
 export class OclifLogger implements Logger {
     constructor(private readonly cmd: Command) { }

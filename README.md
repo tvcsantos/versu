@@ -1,7 +1,7 @@
 <!-- markdownlint-disable-next-line MD041 -->
-![μVERSE - Version Engine for Repo Semantic Evolution](docs/assets/images/muverse.png)
+![VERSU - Version Engine for Repo Semantic Evolution](docs/assets/images/versu_2.png)
 
-# μVERSE - Version Engine for Repo Semantic Evolution
+# VERSU - Version Engine for Repo Semantic Evolution
 
 *Orchestrating your monorepo multiverse.*
 
@@ -22,21 +22,21 @@ A semantic versioning engine for monorepos that uses Conventional Commits to aut
 
 ## 📦 Packages
 
-μVERSE provides three packages for different use cases. For more details, see the individual package READMEs.
+VERSU provides three packages for different use cases. For more details, see the individual package READMEs.
 
-### [@muverse/core](packages/core)
+### [@versu/core](packages/core)
 
-Core library with the `VerseRunner` API for programmatic version management. Framework-agnostic with adapters for different project types (Gradle, extensible).
+Core library with the `VersuRunner` API for programmatic version management. Framework-agnostic with adapters for different project types (Gradle, extensible).
 
 **Use when:** Building custom tools or integrations that need version management.
 
-### [@muverse/cli](packages/cli)
+### [@versu/cli](packages/cli)
 
 Command-line interface for interactive version management in local development and CI/CD pipelines.
 
 **Use when:** You need CLI control or want to integrate with non-GitHub CI/CD systems.
 
-### [@muverse/action](packages/action)
+### [@versu/action](packages/action)
 
 GitHub Actions integration for automated versioning in workflow pipelines.
 
@@ -44,7 +44,7 @@ GitHub Actions integration for automated versioning in workflow pipelines.
 
 ## Commit Message Format
 
-μVERSE uses [Conventional Commits](https://conventionalcommits.org/) to automatically determine version bumps:
+VERSU uses [Conventional Commits](https://conventionalcommits.org/) to automatically determine version bumps:
 
 ```text
 <type>[optional scope]: <description>
@@ -86,14 +86,14 @@ npm test       # Run tests
 
 ```text
 packages/
-├── core/                # Core library (@muverse/core)
+├── core/                # Core library (@versu/core)
 │   └── src/
 │       ├── adapters/    # Project type adapters (Gradle, etc.)
 │       ├── services/    # Core services (versioning, git, changelog)
 │       └── config/      # Configuration system
-├── cli/                 # CLI tool (@muverse/cli)
+├── cli/                 # CLI tool (@versu/cli)
 │   └── src/
-└── action/              # GitHub Action (@muverse/action)
+└── action/              # GitHub Action (@versu/action)
     └── src/
 ```
 

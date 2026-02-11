@@ -1,5 +1,5 @@
 import * as core from '@actions/core';
-import type { Logger } from '@muverse/core';
+import type { Logger } from '@versu/core';
 
 export class ActionsLogger implements Logger {
     debug(message: string): void {

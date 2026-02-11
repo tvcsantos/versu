@@ -1,5 +1,5 @@
 /**
- * Version Bumper Service for μVERSE.
+ * Version Bumper Service for VERSU.
  * Implements core version calculation logic: analyzes commits, cascades changes through
  * dependencies, and applies versions with support for prereleases, metadata, and snapshots.
  */

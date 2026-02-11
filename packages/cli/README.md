@@ -1,25 +1,25 @@
-# @muverse/cli - Command-Line Interface
+# @versu/cli - Command-Line Interface
 
-Command-line interface for μVERSE (Version Engine for Repo Semantic Evolution). This CLI provides all the power of μVERSE's semantic versioning engine through an easy-to-use command-line tool, perfect for local development and custom CI/CD systems.
+Command-line interface for VERSU (Version Engine for Repo Semantic Evolution). This CLI provides all the power of VERSU's semantic versioning engine through an easy-to-use command-line tool, perfect for local development and custom CI/CD systems.
 
 ## Installation
 
 ### Global Installation
 
 ```bash
-npm install -g @muverse/cli
+npm install -g @versu/cli
 ```
 
 ### Local Installation
 
 ```bash
-npm install --save-dev @muverse/cli
+npm install --save-dev @versu/cli
 ```
 
 ### Using npx (no installation)
 
 ```bash
-px @muverse/cli
+px @versu/cli
 ```
 
 ## Usage
@@ -29,7 +29,7 @@ px @muverse/cli
 Navigate to your project root and run:
 
 ```bash
-muverse
+versu
 ```
 
 This will:
@@ -47,13 +47,13 @@ This will:
 Preview what would happen without making changes:
 
 ```bash
-muverse --dry-run
+versu --dry-run
 ```
 
 ### Specify Project Root
 
 ```bash
-muverse /path/to/project
+versu /path/to/project
 ```
 
 ### Specify Adapter
@@ -61,12 +61,12 @@ muverse /path/to/project
 If auto-detection fails or you want to be explicit:
 
 ```bash
-muverse --adapter gradle
+versu --adapter gradle
 ```
 
 ## Command Reference
 
-### `muverse [REPOSITORYROOT]`
+### `versu [REPOSITORYROOT]`
 
 Calculate and apply semantic version changes.
 
@@ -94,7 +94,7 @@ Calculate and apply semantic version changes.
 | `--no-generate-changelog` | Don't generate changelogs | - |
 | `--output-file <value>` | Write calculated versions to a file in JSON format | - |
 
-> 📖 **Detailed Pre-release Documentation**: See [@muverse/core PRERELEASE.md](../core/PRERELEASE.md) for comprehensive examples and use cases.
+> 📖 **Detailed Pre-release Documentation**: See [@versu/core PRERELEASE.md](../core/PRERELEASE.md) for comprehensive examples and use cases.
 
 ## Examples
 
@@ -103,7 +103,7 @@ Calculate and apply semantic version changes.
 Apply semantic versions based on commits:
 
 ```bash
-muverse
+versu
 ```
 
 ### Pre-release Versions
@@ -111,7 +111,7 @@ muverse
 Generate beta pre-release versions:
 
 ```bash
-muverse --prerelease-mode --prerelease-id beta
+versu --prerelease-mode --prerelease-id beta
 ```
 
 ### Timestamp Versions
@@ -119,7 +119,7 @@ muverse --prerelease-mode --prerelease-id beta
 Generate timestamp-based pre-release versions for CI builds:
 
 ```bash
-muverse --prerelease-mode --prerelease-id alpha --timestamp-versions --add-build-metadata
+versu --prerelease-mode --prerelease-id alpha --timestamp-versions --add-build-metadata
 ```
 
 This generates versions like: `1.2.3-alpha.20251208.1530+abc1234`
@@ -129,7 +129,7 @@ This generates versions like: `1.2.3-alpha.20251208.1530+abc1234`
 Generate Gradle SNAPSHOT versions:
 
 ```bash
-muverse --append-snapshot
+versu --append-snapshot
 ```
 
 ### Development Workflow
@@ -137,7 +137,7 @@ muverse --append-snapshot
 Bump all modules (even unchanged) for development:
 
 ```bash
-muverse --prerelease-mode --bump-unchanged
+versu --prerelease-mode --bump-unchanged
 ```
 
 ### Local Testing
@@ -145,7 +145,7 @@ muverse --prerelease-mode --bump-unchanged
 Test without committing or pushing:
 
 ```bash
-muverse --dry-run --no-push-changes --no-push-tags
+versu --dry-run --no-push-changes --no-push-tags
 ```
 
 ### Manual Git Operations
@@ -153,27 +153,27 @@ muverse --dry-run --no-push-changes --no-push-tags
 Calculate versions without automatic git operations:
 
 ```bash
-muverse --no-push-changes --no-push-tags
+versu --no-push-changes --no-push-tags
 ```
 
 Then manually review, commit, and push.
 
 ## Configuration
 
-μVERSE CLI uses the same configuration system as the core library. Configuration files are automatically detected in your repository root.
+VERSU CLI uses the same configuration system as the core library. Configuration files are automatically detected in your repository root.
 
 ### Supported Configuration Files
 
-1. `package.json` (in a `"muverse"` property)
-2. `.muverserc` (JSON or YAML)
-3. `.muverserc.json`
-4. `.muverserc.yaml` / `.muverserc.yml`
-5. `.muverserc.js` (JavaScript)
-6. `muverse.config.js` (JavaScript)
+1. `package.json` (in a `"versu"` property)
+2. `.versurc` (JSON or YAML)
+3. `.versurc.json`
+4. `.versurc.yaml` / `.versurc.yml`
+5. `.versurc.js` (JavaScript)
+6. `versu.config.js` (JavaScript)
 
 ### Configuration Example
 
-`.muverserc.json`:
+`.versurc.json`:
 
 ```json
 {
@@ -232,7 +232,7 @@ api.version=1.5.0
 
 ## Commit Message Format
 
-μVERSE uses [Conventional Commits](https://conventionalcommits.org/) to determine version bumps:
+VERSU uses [Conventional Commits](https://conventionalcommits.org/) to determine version bumps:
 
 ```text
 <type>[optional scope]: <description>
@@ -266,11 +266,11 @@ Breaking changes trigger **major** version bumps:
 ### GitHub Actions
 
 ```yaml
-- name: Install μVERSE CLI
-  run: npm install -g @muverse/cli
+- name: Install VERSU CLI
+  run: npm install -g @versu/cli
 
 - name: Version modules
-  run: muverse --adapter gradle
+  run: versu --adapter gradle
 ```
 
 ### GitLab CI
@@ -278,8 +278,8 @@ Breaking changes trigger **major** version bumps:
 ```yaml
 version:
   script:
-    - npm install -g @muverse/cli
-    - muverse --adapter gradle
+    - npm install -g @versu/cli
+    - versu --adapter gradle
 ```
 
 ### Jenkins
@@ -287,8 +287,8 @@ version:
 ```groovy
 stage('Version') {
   steps {
-    sh 'npm install -g @muverse/cli'
-    sh 'muverse --adapter gradle'
+    sh 'npm install -g @versu/cli'
+    sh 'versu --adapter gradle'
   }
 }
 ```
@@ -300,8 +300,8 @@ Add to your `package.json`:
 ```json
 {
   "scripts": {
-    "version": "muverse --dry-run",
-    "version:release": "muverse"
+    "version": "versu --dry-run",
+    "version:release": "versu"
   }
 }
 ```
@@ -317,11 +317,11 @@ npm run version:release # Actual release
 
 ### Command Not Found
 
-If `muverse` is not found after global installation:
+If `versu` is not found after global installation:
 
 1. Check npm global bin path: `npm bin -g`
 2. Ensure it's in your PATH
-3. Try using npx: `npx @muverse/cli`
+3. Try using npx: `npx @versu/cli`
 
 ### Permission Denied on Push
 
@@ -338,7 +338,7 @@ If versions aren't bumping:
 1. Check commit messages follow Conventional Commits format
 2. Verify you have commits since the last version
 3. Check configuration if certain commit types are ignored
-4. Use `--dry-run` to see what μVERSE detects
+4. Use `--dry-run` to see what VERSU detects
 
 ### Adapter Not Detected
 
@@ -378,8 +378,8 @@ npm publish --workspace packages/cli --access public
 
 ## Related Packages
 
-- **[@muverse/core](../core)** - Core library for custom integrations
-- **[@muverse/action](../action)** - GitHub Actions integration
+- **[@versu/core](../core)** - Core library for custom integrations
+- **[@versu/action](../action)** - GitHub Actions integration
 
 ## License
 

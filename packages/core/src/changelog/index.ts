@@ -65,7 +65,7 @@ export async function generateChangelogsForModules(
   }
 
   logger.info(`Loading changelog configuration from ${configPath}...`);
-  const userConfig = (await import(configPath)).default;
+  const userConfig = (await import(configPath)).default.module;
 
   const prependPlaceholder = userConfig.context.prependPlaceholder;
 
@@ -136,68 +136,93 @@ export async function generateChangelogsForModules(
   return changelogPaths;
 }
 
-/** Generate a root changelog that summarizes all module changes. */
 export async function generateRootChangelog(
   moduleResults: ModuleChangeResult[],
+  getCommitsForModule: (
+    moduleId: string,
+  ) => Promise<{ commits: Commit[]; lastTag: string | null }>,
   repoRoot: string,
-): Promise<string> {
-  const rootChangelogPath = join(repoRoot, "CHANGELOG.md");
-  const date = new Date().toISOString().split("T")[0];
+): Promise<string | undefined> {
+  const moduleResult = moduleResults.find((result) => result.type === "root");
 
-  let content = `## ${date}\n\n`;
-
-  if (moduleResults.length === 0) {
-    content += "No changes in this release.\n\n";
-  } else {
-    content += "### Module Updates\n\n";
-
-    for (const moduleResult of moduleResults) {
-      const fromVersion = moduleResult.from;
-      const toVersion = moduleResult.to;
-      const moduleName = moduleResult.id === "root" ? "Root" : moduleResult.id;
-
-      content += `- **${moduleName}**: ${fromVersion} → ${toVersion}\n`;
-    }
-    content += "\n";
+  if (!moduleResult) {
+    logger.info("No root module found, skipping root changelog generation...");
+    return;
   }
 
-  try {
-    const existingContent = await fs.readFile(rootChangelogPath, "utf8");
-    const lines = existingContent.split("\n");
+  const configPath = path.resolve(repoRoot, "changelog.config.js");
 
-    // Find insertion point (after main heading)
-    let insertIndex = 0;
-    for (let i = 0; i < lines.length; i++) {
-      if (lines[i].startsWith("## ") && i > 0) {
-        insertIndex = i;
-        break;
-      }
-    }
-
-    const beforeInsert = lines.slice(0, insertIndex);
-    const afterInsert = lines.slice(insertIndex);
-
-    const updatedContent = [
-      ...beforeInsert,
-      content.trim(),
-      "",
-      ...afterInsert,
-    ].join("\n");
-
-    await fs.writeFile(rootChangelogPath, updatedContent, "utf8");
-  } catch (error) {
-    if (
-      error instanceof Error &&
-      "code" in error &&
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (error as any).code === "ENOENT"
-    ) {
-      const newContent = `# Changelog\n\n${content}`;
-      await fs.writeFile(rootChangelogPath, newContent, "utf8");
-    } else {
-      throw error;
-    }
+  if (!(await exists(configPath))) {
+    throw new Error(
+      `Missing required changelog configuration file at ${configPath}`,
+    );
   }
 
-  return rootChangelogPath;
+  logger.info(`Loading root changelog configuration from ${configPath}...`);
+  const userConfig = (await import(configPath)).default.root;
+
+  const prependPlaceholder = userConfig.context.prependPlaceholder;
+
+  if (!prependPlaceholder) {
+    throw new Error(
+      "Missing required context property 'prependPlaceholder' in changelog.config.js",
+    );
+  }
+
+  const contextRepository = await buildContextRepository({ cwd: repoRoot });
+
+  /*if (!moduleResult.declaredVersion) {
+      logger.info(
+        `Module ${moduleResult.id} has no declared version, skipping changelog generation...`,
+      );
+      return;
+    }*/
+
+  const { commits, lastTag } = await getCommitsForModule(moduleResult.id);
+
+  if (commits.length === 0) {
+    logger.info(
+      `No commits to include in changelog for module ${moduleResult.id}, skipping...`,
+    );
+    return;
+  }
+
+  const changelogPath = join(repoRoot, moduleResult.path, "CHANGELOG.md");
+
+  let prepend = true;
+  if (await exists(changelogPath)) {
+    prepend = false;
+  }
+
+  const isRelease = isReleaseVersion(moduleResult.to);
+  const version = isRelease ? moduleResult.to : undefined;
+  const currentTag = isRelease
+    ? `${moduleResult.name}@${moduleResult.to}`
+    : undefined;
+  const previousTag = lastTag || undefined;
+
+  const changelogContent = await writeChangelogString(
+    commits,
+    {
+      moduleResults,
+      version: version,
+      previousTag: previousTag,
+      currentTag: currentTag,
+      linkCompare: previousTag && currentTag ? true : false,
+      ...contextRepository,
+      ...userConfig.context,
+      prepend,
+    },
+    userConfig.options,
+  );
+
+  logger.info(changelogContent);
+
+  await updateChangelogFile(
+    changelogContent,
+    changelogPath,
+    prependPlaceholder,
+  );
+
+  return changelogPath;
 }

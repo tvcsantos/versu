@@ -1,6 +1,6 @@
-# @muverse/action - GitHub Action
+# @versu/action - GitHub Action
 
-GitHub Actions wrapper for μVERSE (Version Engine for Repo Semantic Evolution). This action provides seamless integration with GitHub workflows for automatic semantic versioning across your monorepo projects.
+GitHub Actions wrapper for VERSU (Version Engine for Repo Semantic Evolution). This action provides seamless integration with GitHub workflows for automatic semantic versioning across your monorepo projects.
 
 ## Usage
 
@@ -21,12 +21,12 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: μVERSE Semantic Evolution
+      - name: VERSU Semantic Evolution
         id: versioner
-        uses: tvcsantos/muverse@v0
+        uses: tvcsantos/versu@v0
         with:
           dry-run: false
-          # adapter: gradle  # Optional - μVERSE will auto-detect your project type
+          # adapter: gradle  # Optional - VERSU will auto-detect your project type
       - name: Print results
         run: |
           echo "Bumped: ${{ steps.versioner.outputs.bumped }}"
@@ -35,16 +35,16 @@ jobs:
 
 ### Adapter Auto-Detection
 
-μVERSE automatically detects your project type based on the files present in your repository. You don't need to specify the `adapter` input in most cases:
+VERSU automatically detects your project type based on the files present in your repository. You don't need to specify the `adapter` input in most cases:
 
 - **Gradle Projects**: Detected by presence of `build.gradle`, `build.gradle.kts`, `settings.gradle`, or `settings.gradle.kts`
 - **Future Adapters**: More project types will be supported in future releases
 
-If auto-detection fails, μVERSE will throw an error asking you to explicitly specify the `adapter` input:
+If auto-detection fails, VERSU will throw an error asking you to explicitly specify the `adapter` input:
 
 ```yaml
-- name: μVERSE Semantic Evolution
-  uses: tvcsantos/muverse@v0
+- name: VERSU Semantic Evolution
+  uses: tvcsantos/versu@v0
   with:
     adapter: gradle  # Required if auto-detection fails
 ```
@@ -69,7 +69,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Create pre-release versions
-        uses: tvcsantos/muverse@v0
+        uses: tvcsantos/versu@v0
         with:
           adapter: gradle
           prerelease-mode: true
@@ -96,7 +96,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Create timestamp versions
-        uses: tvcsantos/muverse@v0
+        uses: tvcsantos/versu@v0
         with:
           adapter: gradle
           prerelease-mode: true
@@ -129,7 +129,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Create Gradle SNAPSHOT versions
-        uses: tvcsantos/muverse@v0
+        uses: tvcsantos/versu@v0
         with:
           adapter: gradle
           append-snapshot: true
@@ -168,9 +168,9 @@ This applies `-SNAPSHOT` suffix to **all** module versions, generating versions 
 ### Using Outputs
 
 ```yaml
-- name: μVERSE Semantic Evolution
+- name: VERSU Semantic Evolution
   id: versioner
-  uses: tvcsantos/muverse@v0
+  uses: tvcsantos/versu@v0
   
 - name: Check if bumped
   if: steps.versioner.outputs.bumped == 'true'
@@ -202,7 +202,7 @@ For workflows where you want to handle git operations manually:
 
 ```yaml
 - name: Version modules (no git operations)
-  uses: tvcsantos/muverse@v0
+  uses: tvcsantos/versu@v0
   with:
     adapter: gradle
     push-changes: false    # Disable automatic commit/push
@@ -234,18 +234,18 @@ steps:
 
 ## Configuration
 
-μVERSE uses [cosmiconfig](https://github.com/davidtheclark/cosmiconfig) for flexible configuration loading and [Zod](https://github.com/colinhacks/zod) for type-safe validation. Configuration files are automatically detected in your repository root.
+VERSU uses [cosmiconfig](https://github.com/davidtheclark/cosmiconfig) for flexible configuration loading and [Zod](https://github.com/colinhacks/zod) for type-safe validation. Configuration files are automatically detected in your repository root.
 
 ### Supported Configuration Files
 
-μVERSE will automatically search for configuration in the following order:
+VERSU will automatically search for configuration in the following order:
 
-1. `package.json` (in a `"muverse"` property)
-2. `.muverserc` (JSON or YAML)
-3. `.muverserc.json`
-4. `.muverserc.yaml` / `.muverserc.yml`
-5. `.muverserc.js` (JavaScript)
-6. `muverse.config.js` (JavaScript)
+1. `package.json` (in a `"versu"` property)
+2. `.versurc` (JSON or YAML)
+3. `.versurc.json`
+4. `.versurc.yaml` / `.versurc.yml`
+5. `.versurc.js` (JavaScript)
+6. `versu.config.js` (JavaScript)
 
 ### Configuration Options
 
@@ -257,7 +257,7 @@ steps:
 
 ### Configuration Examples
 
-#### JSON Format (`.muverserc.json`)
+#### JSON Format (`.versurc.json`)
 
 ```json
 {
@@ -279,7 +279,7 @@ steps:
 }
 ```
 
-#### YAML Format (`.muverserc.yaml`)
+#### YAML Format (`.versurc.yaml`)
 
 ```yaml
 defaultBump: patch
@@ -299,7 +299,7 @@ dependencyRules:
   onPatchOfDependency: none
 ```
 
-#### JavaScript Format (`muverse.config.js`)
+#### JavaScript Format (`versu.config.js`)
 
 ```javascript
 module.exports = {
@@ -327,7 +327,7 @@ module.exports = {
 ```json
 {
   "name": "my-project",
-  "muverse": {
+  "versu": {
     "defaultBump": "patch",
     "commitTypes": {
       "feat": "minor",
@@ -339,7 +339,7 @@ module.exports = {
 
 ### Configuration Validation
 
-All configuration files are validated using [Zod](https://github.com/colinhacks/zod) schemas to ensure correctness and consistency. If validation fails, μVERSE will provide a detailed error message indicating which configuration fields are invalid.
+All configuration files are validated using [Zod](https://github.com/colinhacks/zod) schemas to ensure correctness and consistency. If validation fails, VERSU will provide a detailed error message indicating which configuration fields are invalid.
 
 ## Gradle Project Support
 
@@ -376,7 +376,7 @@ api.version=1.5.0
 
 ### Version Management
 
-μVERSE manages all module versions through the **root** `gradle.properties` file:
+VERSU manages all module versions through the **root** `gradle.properties` file:
 
 - **All module versions** must be declared in the root `gradle.properties` file
 - **Root module** version uses the `version` property
@@ -386,7 +386,7 @@ api.version=1.5.0
 
 ## Commit Message Format
 
-μVERSE uses [Conventional Commits](https://conventionalcommits.org/) to determine version bumps:
+VERSU uses [Conventional Commits](https://conventionalcommits.org/) to determine version bumps:
 
 ```text
 <type>[optional scope]: <description>
@@ -449,7 +449,7 @@ jobs:
       - name: Release version
         if: github.ref == 'refs/heads/main'
         id: release
-        uses: tvcsantos/muverse@v0
+        uses: tvcsantos/versu@v0
         with:
           adapter: gradle
           push-changes: true
@@ -459,7 +459,7 @@ jobs:
       - name: Pre-release version
         if: github.ref == 'refs/heads/develop'
         id: prerelease
-        uses: tvcsantos/muverse@v0
+        uses: tvcsantos/versu@v0
         with:
           adapter: gradle
           prerelease-mode: true
@@ -472,7 +472,7 @@ jobs:
       - name: CI version
         if: startsWith(github.ref, 'refs/heads/feature/')
         id: ci
-        uses: tvcsantos/muverse@v0
+        uses: tvcsantos/versu@v0
         with:
           adapter: gradle
           prerelease-mode: true
@@ -533,8 +533,8 @@ If auto-detection fails:
 
 ## Related Packages
 
-- **[@muverse/core](../core)** - Core library for custom integrations
-- **[@muverse/cli](../cli)** - CLI tool for local development
+- **[@versu/core](../core)** - Core library for custom integrations
+- **[@versu/cli](../cli)** - CLI tool for local development
 
 ## License
 

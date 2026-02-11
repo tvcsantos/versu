@@ -1,5 +1,8 @@
 import { logger } from "../utils/logger.js";
-import { generateChangelogsForModules } from "../changelog/index.js";
+import {
+  generateChangelogsForModules,
+  generateRootChangelog,
+} from "../changelog/index.js";
 import { ModuleChangeResult } from "./version-applier.js";
 import { Commit } from "conventional-commits-parser";
 
@@ -38,12 +41,17 @@ export class ChangelogGenerator {
       this.options.repoRoot,
     );
 
-    /*// Generate root changelog
+    // Generate root changelog
     const rootChangelogPath = await generateRootChangelog(
       moduleResults,
+      async (moduleId) =>
+        moduleCommits.get(moduleId) || { commits: [], lastTag: null },
       this.options.repoRoot,
     );
-    changelogPaths.push(rootChangelogPath);*/
+
+    if (rootChangelogPath) {
+      changelogPaths.push(rootChangelogPath);
+    }
 
     logger.info(`📝 Generated ${changelogPaths.length} changelog files`);
     return changelogPaths;

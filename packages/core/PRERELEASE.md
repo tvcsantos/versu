@@ -1,6 +1,6 @@
 # Pre-release Version Support
 
-μVERSE supports generating pre-release versions for development and testing builds.
+VERSU supports generating pre-release versions for development and testing builds.
 
 ## Options
 

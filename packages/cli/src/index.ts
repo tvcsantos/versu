@@ -1,5 +1,5 @@
 import { Args, Command, Flags } from "@oclif/core";
-import { VerseRunner, RunnerOptions, initLogger } from "@muverse/core";
+import { VersuRunner, RunnerOptions, initLogger } from "@versu/core";
 import { OclifLogger } from "./logger.js";
 
 export default class Version extends Command {
@@ -101,7 +101,7 @@ export default class Version extends Command {
         outputFile: flags["output-file"],
       };
 
-      const runner = new VerseRunner(options);
+      const runner = new VersuRunner(options);
       await runner.run();
     } catch (error) {
       const errorMessage =

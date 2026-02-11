@@ -1,11 +1,11 @@
-// Core μVERSE exports - business logic without GitHub Actions dependency
+// Core VERSU exports - business logic without GitHub Actions dependency
 
 // Configuration
 export * from './config/index.js';
 
 // Services
-export { VerseRunner } from './services/verse-runner.js';
-export type { RunnerOptions, RunnerResult } from './services/verse-runner.js';
+export { VersuRunner } from './services/versu-runner.js';
+export type { RunnerOptions, RunnerResult } from './services/versu-runner.js';
 export { VersionManager } from './services/version-manager.js';
 export { ModuleRegistry } from './services/module-registry.js';
 export { VersionBumper } from './services/version-bumper.js';

@@ -1,6 +1,6 @@
 {
-  "name": "@muverse/action",
-  "version": "0.3.1",
+  "name": "@versu/action",
+  "version": "0.4.0",
   "description": "Version Engine for Repo Semantic Evolution (GitHub Action)",
   "main": "dist/index.js",
   "private": true,
@@ -16,7 +16,7 @@
     "copy-action-yml": "node scripts/copy-action-yml.mjs"
   },
   "keywords": [
-    "muverse",
+    "versu",
     "github-action",
     "semantic-versioning",
     "conventional-commits",
@@ -29,18 +29,18 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/tvcsantos/muverse.git"
+    "url": "git+https://github.com/tvcsantos/versu.git"
   },
   "bugs": {
-    "url": "https://github.com/tvcsantos/muverse/issues"
+    "url": "https://github.com/tvcsantos/versu/issues"
   },
-  "homepage": "https://github.com/tvcsantos/muverse#readme",
+  "homepage": "https://github.com/tvcsantos/versu#readme",
   "files": ["dist"],
   "dependencies": {
     "@actions/core": "^1.10.1",
     "@actions/exec": "^1.1.1",
     "@actions/github": "^6.0.0",
-    "@muverse/core": "^0.3.1"
+    "@versu/core": "^0.4.0"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^28.0.8",
