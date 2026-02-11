@@ -1,6 +1,6 @@
 {
   "name": "@versu/cli",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "Version Engine for Repo Semantic Evolution (CLI)",
   "type": "module",
   "main": "dist/index.js",
@@ -38,7 +38,7 @@
   "types": "dist/index.d.ts",
   "dependencies": {
     "@oclif/core": "^4.8.0",
-    "@versu/core": "^0.4.0",
+    "@versu/core": "^0.4.1",
     "oclif": "^4.14.0"
   },
   "devDependencies": {

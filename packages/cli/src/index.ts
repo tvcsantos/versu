@@ -1,6 +1,7 @@
 import { Args, Command, Flags } from "@oclif/core";
 import { VersuRunner, RunnerOptions, initLogger } from "@versu/core";
 import { OclifLogger } from "./logger.js";
+import * as path from "path";
 
 export default class Version extends Command {
   static override description = "Calculate and apply semantic version changes";
@@ -75,12 +76,14 @@ export default class Version extends Command {
     }),
     "output-file": Flags.string({
       description: "Path to the output file for project information",
-      default: "project-information.json",
+      required: false,
     }),
   };
 
   async run(): Promise<void> {
     const { flags, args } = await this.parse(Version);
+
+    const defaultOutputFile = flags["output-file"] || path.join(args.repositoryRoot, "project-information.json");
 
     initLogger(new OclifLogger(this));
 
@@ -98,7 +101,7 @@ export default class Version extends Command {
         appendSnapshot: flags["append-snapshot"],
         pushChanges: flags["push-changes"],
         generateChangelog: flags["generate-changelog"],
-        outputFile: flags["output-file"],
+        outputFile: defaultOutputFile,
       };
 
       const runner = new VersuRunner(options);
