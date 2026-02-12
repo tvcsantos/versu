@@ -461,6 +461,12 @@ function getModuleTagPattern(moduleName: string): string {
   return `${moduleName}@*`;
 }
 
+export function getModuleTagName(moduleName: string, version: string): string {
+  // Construct tag name for a module and version
+  // Format: moduleName@version (e.g., 'core@1.0.0')
+  return `${moduleName}@${version}`;
+}
+
 /**
  * Parses a git tag name to extract module and version components.
  *

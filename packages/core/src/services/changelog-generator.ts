@@ -5,11 +5,17 @@ import {
 } from "../changelog/index.js";
 import { ModuleChangeResult } from "./version-applier.js";
 import { Commit } from "conventional-commits-parser";
+import zod from "zod";
+import { changelogSchema, configSchema } from "../config/index.js";
+
+export type ModuleChangelogConfig = zod.infer<typeof changelogSchema>;
+export type ChangelogConfig = zod.infer<typeof configSchema>["changelog"];
 
 export type ChangelogGeneratorOptions = {
   generateChangelog: boolean;
   repoRoot: string;
   dryRun: boolean;
+  config: ChangelogConfig;
 };
 
 export class ChangelogGenerator {
@@ -39,6 +45,7 @@ export class ChangelogGenerator {
       async (moduleId) =>
         moduleCommits.get(moduleId) || { commits: [], lastTag: null },
       this.options.repoRoot,
+      this.options.config?.module,
     );
 
     // Generate root changelog
@@ -47,6 +54,7 @@ export class ChangelogGenerator {
       async (moduleId) =>
         moduleCommits.get(moduleId) || { commits: [], lastTag: null },
       this.options.repoRoot,
+      this.options.config?.root,
     );
 
     if (rootChangelogPath) {

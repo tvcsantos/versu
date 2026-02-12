@@ -1,12 +1,13 @@
 import { promises as fs } from "fs";
-import path, { join } from "path";
+import { join } from "path";
 import { ModuleChangeResult } from "../services/version-applier.js";
-import { writeChangelogString } from "conventional-changelog-writer";
+import { Context, Options, writeChangelogString } from "conventional-changelog-writer";
 import { logger } from "../utils/logger.js";
 import { Commit } from "conventional-commits-parser";
 import { exists } from "../utils/file.js";
 import { getCurrentRepoUrl, GitOptions, parseRepoUrl } from "../git/index.js";
 import { isReleaseVersion } from "../semver/index.js";
+import { ModuleChangelogConfig } from "../services/changelog-generator.js";
 
 /** Update or create a changelog file for a module. */
 export async function updateChangelogFile(
@@ -53,25 +54,21 @@ export async function generateChangelogsForModules(
     moduleId: string,
   ) => Promise<{ commits: Commit[]; lastTag: string | null }>,
   repoRoot: string,
+  config?: ModuleChangelogConfig,
 ): Promise<string[]> {
   const changelogPaths: string[] = [];
 
-  const configPath = path.resolve(repoRoot, "changelog.config.js");
-
-  if (!(await exists(configPath))) {
+  if (!config) {
     throw new Error(
-      `Missing required changelog configuration file at ${configPath}`,
+      `Missing required changelog configuration`,
     );
   }
 
-  logger.info(`Loading changelog configuration from ${configPath}...`);
-  const userConfig = (await import(configPath)).default.module;
-
-  const prependPlaceholder = userConfig.context.prependPlaceholder;
+  const prependPlaceholder = config?.context.prependPlaceholder;
 
   if (!prependPlaceholder) {
     throw new Error(
-      "Missing required context property 'prependPlaceholder' in changelog.config.js",
+      "Missing required context property 'prependPlaceholder'",
     );
   }
 
@@ -116,10 +113,10 @@ export async function generateChangelogsForModules(
         currentTag: currentTag,
         linkCompare: previousTag && currentTag ? true : false,
         ...contextRepository,
-        ...userConfig.context,
+        ...config?.context,
         prepend,
-      },
-      userConfig.options,
+      } as Context<Commit>,
+      config?.options as Options<Commit>,
     );
 
     logger.info(changelogContent);
@@ -142,6 +139,7 @@ export async function generateRootChangelog(
     moduleId: string,
   ) => Promise<{ commits: Commit[]; lastTag: string | null }>,
   repoRoot: string,
+  config?: ModuleChangelogConfig,
 ): Promise<string | undefined> {
   const moduleResult = moduleResults.find((result) => result.type === "root");
 
@@ -150,22 +148,19 @@ export async function generateRootChangelog(
     return;
   }
 
-  const configPath = path.resolve(repoRoot, "changelog.config.js");
-
-  if (!(await exists(configPath))) {
+  if (!config) {
     throw new Error(
-      `Missing required changelog configuration file at ${configPath}`,
+      `Missing required changelog configuration`,
     );
   }
 
-  logger.info(`Loading root changelog configuration from ${configPath}...`);
-  const userConfig = (await import(configPath)).default.root;
+  logger.info(`Loading root changelog configuration...`);
 
-  const prependPlaceholder = userConfig.context.prependPlaceholder;
+  const prependPlaceholder = config?.context.prependPlaceholder;
 
   if (!prependPlaceholder) {
     throw new Error(
-      "Missing required context property 'prependPlaceholder' in changelog.config.js",
+      "Missing required context property 'prependPlaceholder'",
     );
   }
 
@@ -210,10 +205,10 @@ export async function generateRootChangelog(
       currentTag: currentTag,
       linkCompare: previousTag && currentTag ? true : false,
       ...contextRepository,
-      ...userConfig.context,
+      ...config?.context,
       prepend,
-    },
-    userConfig.options,
+    } as Context<Commit>,
+    config?.options as Options<Commit>,
   );
 
   logger.info(changelogContent);

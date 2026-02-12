@@ -1,7 +1,8 @@
 import { logger } from "../utils/logger.js";
 import { VersionManager } from "./version-manager.js";
-import { BumpType, formatSemVer } from "../semver/index.js";
+import { BumpType, formatSemVer, isReleaseVersion } from "../semver/index.js";
 import { ProcessedModuleChange } from "./version-bumper.js";
+import { getModuleTagName } from "../git/index.js";
 
 export type VersionApplierOptions = {
   dryRun: boolean;
@@ -16,6 +17,8 @@ export type ModuleChangeResult = {
   readonly to: string;
   readonly bumpType: BumpType;
   readonly declaredVersion: boolean;
+  readonly isRelease: boolean;
+  readonly tagName?: string;
 };
 
 export class VersionApplier {
@@ -55,16 +58,23 @@ export class VersionApplier {
     }
 
     // Create and return result objects
-    return processedModuleChanges.map((change) => ({
-      id: change.module.id,
-      name: change.module.name,
-      path: change.module.path,
-      type: change.module.type,
-      from: formatSemVer(change.fromVersion),
-      to: change.toVersion,
-      bumpType: change.bumpType,
-      declaredVersion: change.module.declaredVersion,
-    }));
+    return processedModuleChanges.map((change) => {
+      const isRelease = isReleaseVersion(change.toVersion);
+      return {
+        id: change.module.id,
+        name: change.module.name,
+        path: change.module.path,
+        type: change.module.type,
+        from: formatSemVer(change.fromVersion),
+        to: change.toVersion,
+        bumpType: change.bumpType,
+        declaredVersion: change.module.declaredVersion,
+        tagName: isRelease
+          ? getModuleTagName(change.module.name, change.toVersion)
+          : undefined,
+        isRelease: isRelease,
+      };
+    });
   }
 
   private logPlannedChanges(

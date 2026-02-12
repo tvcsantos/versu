@@ -39,7 +39,6 @@ export type RunnerOptions = {
   readonly appendSnapshot: boolean;
   readonly pushChanges: boolean;
   readonly generateChangelog: boolean;
-  readonly outputFile: string;
 };
 
 export type RunnerResult = {
@@ -63,7 +62,7 @@ export class VersuRunner {
   private commitAnalyzer!: CommitAnalyzer;
   private versionBumper!: VersionBumper; // Will be initialized in run()
   private versionApplier!: VersionApplier; // Will be initialized in run()
-  private changelogGenerator: ChangelogGenerator;
+  private changelogGenerator!: ChangelogGenerator; // Will be initialized in run()
   private gitOperations!: GitOperations; // Will be initialized in run()
   private adapterIdentifierRegistry: AdapterIdentifierRegistry;
   private adapterMetadataProvider: AdapterMetadataProvider;
@@ -72,18 +71,12 @@ export class VersuRunner {
     this.options = {
       ...options,
       repoRoot: path.resolve(options.repoRoot),
-      outputFile: path.resolve(options.outputFile),
     };
 
     // Initialize services
     this.configurationLoader = new ConfigurationLoader(
       new ConfigurationValidator(),
     );
-    this.changelogGenerator = new ChangelogGenerator({
-      generateChangelog: options.generateChangelog,
-      repoRoot: options.repoRoot,
-      dryRun: options.dryRun,
-    });
     this.adapterIdentifierRegistry = createAdapterIdentifierRegistry();
     this.adapterMetadataProvider = new AdapterMetadataProvider(
       this.adapterIdentifierRegistry,
@@ -101,7 +94,6 @@ export class VersuRunner {
     logger.info("");
     logger.info("🚀 Starting VERSU engine...");
     logger.info(`Repository: ${this.options.repoRoot}`);
-    logger.info(`Output file: ${this.options.outputFile}`);
     logger.info(`Adapter: ${this.options.adapter || "(auto-detect)"}`);
     logger.info(`Dry run: ${this.options.dryRun}`);
     logger.info(`Prerelease mode: ${this.options.prereleaseMode}`);
@@ -170,7 +162,8 @@ export class VersuRunner {
       this.options.repoRoot,
     );
     // Load configuration
-    this.config = await this.configurationLoader.load(this.options.repoRoot);
+    const configDirectory = path.join(this.options.repoRoot, ".versu");
+    this.config = await this.configurationLoader.load(configDirectory);
 
     // Check if working directory is clean
     if (
@@ -185,7 +178,7 @@ export class VersuRunner {
     // Discover modules and get hierarchy manager
     logger.info("🔍 Discovering modules...");
     const detector = this.moduleSystemFactory.createDetector(
-      this.options.outputFile,
+      path.resolve(path.join(configDirectory, 'project-information.json')),
     );
     this.moduleRegistry = await detector.detect();
 
@@ -256,6 +249,13 @@ export class VersuRunner {
     const changedModules = await this.versionApplier.applyVersionChanges(
       processedModuleChanges,
     );
+    
+    this.changelogGenerator = new ChangelogGenerator({
+      generateChangelog: this.options.generateChangelog,
+      repoRoot: this.options.repoRoot,
+      dryRun: this.options.dryRun,
+      config: this.config.changelog,
+    });
 
     // Generate changelogs
     const changelogPaths = await this.changelogGenerator.generateChangelogs(

@@ -200,6 +200,8 @@ export async function getRawProjectInformation(projectRoot: string, outputFile: 
 
   if (executeScript) {
     // Write back to file with hash for future cache validation
+    const dirname = path.dirname(outputFile);
+    await fs.mkdir(dirname, { recursive: true });
     await fs.writeFile(outputFile, JSON.stringify(cachedData, null, 2), 'utf-8');
   }
   

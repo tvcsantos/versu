@@ -40,6 +40,27 @@ const nodeJSConfigSchema = z.object({
   updatePackageLock: z.boolean(),
 });
 
+export const changelogSchema = z
+  .object({
+    context: z
+      .object({
+        prependPlaceholder: z.string(),
+      })
+      .loose(),
+    options: z
+      .object({
+        groupBy: z.string().optional(),
+        commitsGroupsSort: z.function().optional(),
+        transform: z.function().optional(),
+        mainTemplate: z.string().optional(),
+        commitPartial: z.string().optional(),
+        headerPartial: z.string().optional(),
+        footerPartial: z.string().optional(),
+      })
+      .optional(),
+  })
+  .optional();
+
 /**
  * Zod schema for the main Config object.
  * This schema is used by ConfigurationValidator to ensure type-safe
@@ -50,6 +71,12 @@ export const configSchema = z.object({
   commitTypes: z.record(z.string(), bumpTypeOrIgnoreSchema),
   dependencyRules: dependencyRulesSchema,
   nodejs: nodeJSConfigSchema.optional(),
+  changelog: z
+    .object({
+      root: changelogSchema,
+      module: changelogSchema,
+    })
+    .optional(),
 });
 
 /**
