@@ -1,5 +1,5 @@
 <!-- markdownlint-disable-next-line MD041 -->
-![VERSU - Version Engine for Repo Semantic Evolution](docs/assets/images/versu_2.png)
+![VERSU - Version Engine for Repo Semantic Evolution](docs/assets/images/versu_4.png)
 
 # VERSU - Version Engine for Repo Semantic Evolution
 
