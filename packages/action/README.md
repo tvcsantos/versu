@@ -1,6 +1,6 @@
 # @versu/action - GitHub Action
 
-GitHub Actions wrapper for VERSU (Version Engine for Repo Semantic Evolution). This action provides seamless integration with GitHub workflows for automatic semantic versioning across your monorepo projects.
+GitHub Actions wrapper for VERSU. This action provides seamless integration with GitHub workflows for automatic semantic versioning across your monorepo projects.
 
 ## Usage
 

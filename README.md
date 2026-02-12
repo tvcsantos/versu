@@ -1,9 +1,9 @@
 <!-- markdownlint-disable-next-line MD041 -->
-![VERSU - Version Engine for Repo Semantic Evolution](docs/assets/images/versu_4.png)
+![versu](docs/assets/images/versu_4.png)
 
-# VERSU - Version Engine for Repo Semantic Evolution
+# versu
 
-*Orchestrating your monorepo multiverse.*
+*Compose the epic of your code, one release at a time.*
 
 A semantic versioning engine for monorepos that uses Conventional Commits to automatically version modules independently while cascading changes through dependencies.
 

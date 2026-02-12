@@ -1,6 +1,6 @@
 # @versu/cli - Command-Line Interface
 
-Command-line interface for VERSU (Version Engine for Repo Semantic Evolution). This CLI provides all the power of VERSU's semantic versioning engine through an easy-to-use command-line tool, perfect for local development and custom CI/CD systems.
+Command-line interface for VERSU. This CLI provides all the power of VERSU's semantic versioning engine through an easy-to-use command-line tool, perfect for local development and custom CI/CD systems.
 
 ## Installation
 

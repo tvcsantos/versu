@@ -1,6 +1,6 @@
 # @versu/core - Core Library
 
-The core business logic powering VERSU (Version Engine for Repo Semantic Evolution). This package is completely framework-agnostic and can be integrated into any TypeScript/JavaScript project, CI/CD system, or custom tooling.
+The core business logic powering VERSU. This package is completely framework-agnostic and can be integrated into any TypeScript/JavaScript project, CI/CD system, or custom tooling.
 
 ## Installation
 

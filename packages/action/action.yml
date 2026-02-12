@@ -1,4 +1,4 @@
-name: 'VERSU - Version Engine for Repo Semantic Evolution'
+name: 'VERSU'
 description: 'Intelligent semantic version management engine for monorepo projects with dependency cascade evolution'
 author: 'Your Organization'
 inputs:

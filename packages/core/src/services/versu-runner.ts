@@ -89,8 +89,7 @@ export class VersuRunner {
 
   private logStartupInfo(): void {
     logger.info(banner);
-    logger.info("🌌 Version Engine for Repo Semantic Evolution");
-    logger.info("   Orchestrating your monorepo multiverse...");
+    logger.info("Composing the history of your code, one version at a time....");
     logger.info("");
     logger.info("🚀 Starting VERSU engine...");
     logger.info(`Repository: ${this.options.repoRoot}`);
