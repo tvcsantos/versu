@@ -1,7 +1,11 @@
 import { promises as fs } from "fs";
 import { join } from "path";
 import { ModuleChangeResult } from "../services/version-applier.js";
-import { Context, Options, writeChangelogString } from "conventional-changelog-writer";
+import {
+  Context,
+  Options,
+  writeChangelogString,
+} from "conventional-changelog-writer";
 import { logger } from "../utils/logger.js";
 import { Commit } from "conventional-commits-parser";
 import { exists } from "../utils/file.js";
@@ -59,17 +63,13 @@ export async function generateChangelogsForModules(
   const changelogPaths: string[] = [];
 
   if (!config) {
-    throw new Error(
-      `Missing required changelog configuration`,
-    );
+    throw new Error(`Missing required changelog configuration`);
   }
 
   const prependPlaceholder = config?.context.prependPlaceholder;
 
   if (!prependPlaceholder) {
-    throw new Error(
-      "Missing required context property 'prependPlaceholder'",
-    );
+    throw new Error("Missing required context property 'prependPlaceholder'");
   }
 
   const contextRepository = await buildContextRepository({ cwd: repoRoot });
@@ -149,9 +149,7 @@ export async function generateRootChangelog(
   }
 
   if (!config) {
-    throw new Error(
-      `Missing required changelog configuration`,
-    );
+    throw new Error(`Missing required changelog configuration`);
   }
 
   logger.info(`Loading root changelog configuration...`);
@@ -159,9 +157,7 @@ export async function generateRootChangelog(
   const prependPlaceholder = config?.context.prependPlaceholder;
 
   if (!prependPlaceholder) {
-    throw new Error(
-      "Missing required context property 'prependPlaceholder'",
-    );
+    throw new Error("Missing required context property 'prependPlaceholder'");
   }
 
   const contextRepository = await buildContextRepository({ cwd: repoRoot });

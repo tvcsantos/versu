@@ -71,6 +71,7 @@ export const configSchema = z.object({
   commitTypes: z.record(z.string(), bumpTypeOrIgnoreSchema),
   dependencyRules: dependencyRulesSchema,
   nodejs: nodeJSConfigSchema.optional(),
+  plugins: z.array(z.string()).optional().default([]),
   changelog: z
     .object({
       root: changelogSchema,
@@ -114,6 +115,7 @@ export const DEFAULT_CONFIG: Config = {
     ci: "ignore",
     build: "ignore",
   },
+  plugins: [],
   dependencyRules: {
     onMajorOfDependency: "major",
     onMinorOfDependency: "minor",

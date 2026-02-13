@@ -6,7 +6,8 @@
   "workspaces": [
     "packages/core",
     "packages/cli",
-    "packages/action"
+    "packages/action",
+    "packages/plugin-gradle"
   ],
   "scripts": {
     "build": "npm run build --workspaces",

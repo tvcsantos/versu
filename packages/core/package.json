@@ -13,13 +13,12 @@
   "scripts": {
     "prebuild": "node scripts/generate-version.js",
     "build": "npm run build:esm",
-    "build:esm": "tsc --project tsconfig.json --outDir dist && npm run copy-assets",
-    "build:cjs": "tsc --project tsconfig.cjs.json --outDir dist && npm run copy-assets",
+    "build:esm": "tsc --project tsconfig.json --outDir dist",
+    "build:cjs": "tsc --project tsconfig.cjs.json --outDir dist",
     "test": "vitest",
     "test:coverage": "vitest --coverage",
     "lint": "eslint src/**/*.ts",
-    "format": "prettier --write src/**/*.ts",
-    "copy-assets": "cpx \"src/adapters/gradle/init-project-information.gradle.kts\" \"dist/adapters/gradle/\""
+    "format": "prettier --write src/**/*.ts"
   },
   "keywords": [
     "versu",

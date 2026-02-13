@@ -17,7 +17,7 @@ export class ConfigurationLoader {
    */
   constructor(private readonly configurationValidator: ConfigurationValidator) {
     // Initialize cosmiconfig explorer once for reuse across multiple loads
-    this.explorer = cosmiconfig("versu", { searchStrategy: 'global' });
+    this.explorer = cosmiconfig("versu", { searchStrategy: "global" });
   }
 
   /**

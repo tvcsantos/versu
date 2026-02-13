@@ -19,9 +19,11 @@ export { CommitAnalyzer } from './services/commit-analyzer.js';
 export { ConfigurationLoader } from './services/configuration-loader.js';
 export type { AdapterIdentifier, AdapterMetadata } from './services/adapter-identifier.js';
 export { AdapterIdentifierRegistry } from './services/adapter-identifier-registry.js';
+export type { ModuleDetector } from './services/module-detector.js';
+export type { VersionUpdateStrategy } from './services/version-update-strategy.js';
 
 // Adapters
-export type { ProjectInformation, Module } from './adapters/project-information.js';
+export type { RawProjectInformation, ProjectInformation, Module, BaseModule } from './adapters/project-information.js';
 
 // Factories
 export { createModuleSystemFactory } from './factories/module-system-factory.js';

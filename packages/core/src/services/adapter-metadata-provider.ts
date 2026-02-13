@@ -90,7 +90,9 @@ export class AdapterMetadataProvider {
       throw new Error(
         "No project adapter could be auto-detected. " +
           'Please specify the "adapter" input explicitly in your workflow. ' +
-          "Supported adapters: gradle. For more information, see the documentation.",
+          "Supported adapters: " +
+          this.adapterIdentifierRegistry.getSupportedAdapters().join(", ") +
+          ". For more information, see the documentation.",
       );
     }
 

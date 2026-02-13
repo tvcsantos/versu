@@ -1,6 +1,5 @@
 import { ModuleSystemFactory } from "../services/module-system-factory.js";
-import { GradleModuleSystemFactory } from "../adapters/gradle/services/gradle-module-system-factory.js";
-import { GRADLE_ID } from "../adapters/gradle/constants.js";
+import { AdapterPluginContract } from "../plugins/plugin-loader.js";
 
 /**
  * Creates the appropriate module system factory for a given adapter.
@@ -11,14 +10,15 @@ import { GRADLE_ID } from "../adapters/gradle/constants.js";
  */
 export function createModuleSystemFactory(
   adapterName: string,
+  adapterPlugins: AdapterPluginContract[],
   repoRoot: string,
 ): ModuleSystemFactory {
-  // Normalize adapter name to lowercase for case-insensitive matching
-  switch (adapterName.toLowerCase()) {
-    case GRADLE_ID:
-      return new GradleModuleSystemFactory(repoRoot);
-
-    default:
-      throw new Error(`Unsupported adapter: ${adapterName}`);
+  const lowerCasedAdapterName = adapterName.toLowerCase();
+  const candidatePlugin = adapterPlugins.find(
+    (plugin) => plugin.id.toLowerCase() === lowerCasedAdapterName,
+  );
+  if (!candidatePlugin) {
+    throw new Error(`Unsupported adapter: ${adapterName}`);
   }
+  return candidatePlugin.moduleSystemFactory(repoRoot);
 }

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { readFileSync, writeFileSync } from 'fs';
+import { mkdirSync, readFileSync, writeFileSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 
@@ -17,5 +17,6 @@ export const VERSION = "${version}";
 export const PACKAGE_NAME = "${packageName}";
 `;
 
+mkdirSync(join(__dirname, '../src/utils'), { recursive: true });
 writeFileSync(versionFilePath, content, 'utf-8');
 console.log(`✓ Generated version.ts with version ${version} and package ${packageName}`);

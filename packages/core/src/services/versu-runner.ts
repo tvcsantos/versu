@@ -25,6 +25,7 @@ import { Module } from "../adapters/project-information.js";
 import { ConfigurationValidator } from "./configuration-validator.js";
 import { banner } from "../utils/banner.js";
 import path from "path";
+import { PluginLoader } from "../plugins/plugin-loader.js";
 
 export type RunnerOptions = {
   readonly repoRoot: string;
@@ -64,8 +65,9 @@ export class VersuRunner {
   private versionApplier!: VersionApplier; // Will be initialized in run()
   private changelogGenerator!: ChangelogGenerator; // Will be initialized in run()
   private gitOperations!: GitOperations; // Will be initialized in run()
-  private adapterIdentifierRegistry: AdapterIdentifierRegistry;
-  private adapterMetadataProvider: AdapterMetadataProvider;
+  private adapterIdentifierRegistry!: AdapterIdentifierRegistry;
+  private adapterMetadataProvider!: AdapterMetadataProvider;
+  private pluginLoader!: PluginLoader; // Will be initialized in run()
 
   constructor(options: RunnerOptions) {
     this.options = {
@@ -77,19 +79,13 @@ export class VersuRunner {
     this.configurationLoader = new ConfigurationLoader(
       new ConfigurationValidator(),
     );
-    this.adapterIdentifierRegistry = createAdapterIdentifierRegistry();
-    this.adapterMetadataProvider = new AdapterMetadataProvider(
-      this.adapterIdentifierRegistry,
-      {
-        repoRoot: options.repoRoot,
-        adapter: options.adapter,
-      },
-    );
   }
 
   private logStartupInfo(): void {
     logger.info(banner);
-    logger.info("Composing the history of your code, one version at a time....");
+    logger.info(
+      "Composing the history of your code, one version at a time....",
+    );
     logger.info("");
     logger.info("🚀 Starting VERSU engine...");
     logger.info(`Repository: ${this.options.repoRoot}`);
@@ -153,16 +149,34 @@ export class VersuRunner {
   }
 
   private async doRun(): Promise<RunnerResult> {
+    // Load configuration
+    const configDirectory = path.join(this.options.repoRoot, ".versu");
+    this.config = await this.configurationLoader.load(configDirectory);
+
+    this.pluginLoader = new PluginLoader();
+    await this.pluginLoader.loadSelectedPlugins(this.config.plugins);
+    const plugins = this.pluginLoader.plugins;
+
+    this.adapterIdentifierRegistry = createAdapterIdentifierRegistry(
+      plugins
+    );
+
+    this.adapterMetadataProvider = new AdapterMetadataProvider(
+      this.adapterIdentifierRegistry,
+      {
+        repoRoot: this.options.repoRoot,
+        adapter: this.options.adapter,
+      },
+    );
+
     this.adapter = await this.adapterMetadataProvider.getMetadata();
 
     // Initialize module system factory with resolved adapter
     this.moduleSystemFactory = createModuleSystemFactory(
       this.adapter.id,
+      plugins.flatMap((plugin) => plugin.adapters),
       this.options.repoRoot,
     );
-    // Load configuration
-    const configDirectory = path.join(this.options.repoRoot, ".versu");
-    this.config = await this.configurationLoader.load(configDirectory);
 
     // Check if working directory is clean
     if (
@@ -177,7 +191,7 @@ export class VersuRunner {
     // Discover modules and get hierarchy manager
     logger.info("🔍 Discovering modules...");
     const detector = this.moduleSystemFactory.createDetector(
-      path.resolve(path.join(configDirectory, 'project-information.json')),
+      path.resolve(path.join(configDirectory, "project-information.json")),
     );
     this.moduleRegistry = await detector.detect();
 
@@ -248,7 +262,7 @@ export class VersuRunner {
     const changedModules = await this.versionApplier.applyVersionChanges(
       processedModuleChanges,
     );
-    
+
     this.changelogGenerator = new ChangelogGenerator({
       generateChangelog: this.options.generateChangelog,
       repoRoot: this.options.repoRoot,
