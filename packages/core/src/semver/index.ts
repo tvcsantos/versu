@@ -7,13 +7,27 @@ import { SemVer } from "semver";
  */
 export type BumpType = "major" | "minor" | "patch" | "none";
 
+export type Version = {
+  major: number;
+  minor: number;
+  patch: number;
+  prerelease: ReadonlyArray<string | number>;
+  build: ReadonlyArray<string>;
+  raw: string; // Full version string with all metadata
+  version: string; // Core version string (major.minor.patch-prerelease)
+};
+
 /**
  * Parses a semantic version string into a SemVer object.
  * @param versionString - The version string to parse (e.g., '1.2.3', '2.0.0-beta.1')
  * @returns A parsed SemVer object with structured version components
  * @throws {Error} If the version string is invalid or cannot be parsed
  */
-export function parseSemVer(versionString: string): SemVer {
+export function parseSemVer(versionString: string): Version {
+  return parseSemVerInternal(versionString);
+}
+
+function parseSemVerInternal(versionString: string): SemVer {
   const parsed = semver.parse(versionString);
 
   if (!parsed) {
@@ -28,7 +42,7 @@ export function parseSemVer(versionString: string): SemVer {
  * @param version - The SemVer object to format
  * @returns The version as a string, preserving all components including build metadata
  */
-export function formatSemVer(version: SemVer): string {
+export function formatSemVer(version: Version): string {
   return version.raw;
 }
 
@@ -38,8 +52,8 @@ export function formatSemVer(version: SemVer): string {
  * @param b - The second version to compare
  * @returns `-1` if a < b, `0` if a === b, `1` if a > b
  */
-export function compareSemVer(a: SemVer, b: SemVer): number {
-  return semver.compare(a, b);
+export function compareSemVer(a: Version, b: Version): number {
+  return semver.compare(a.raw, b.raw);
 }
 
 /**
@@ -49,12 +63,12 @@ export function compareSemVer(a: SemVer, b: SemVer): number {
  * @returns A new SemVer object with the incremented version
  * @throws {Error} If the version cannot be bumped with the specified type
  */
-export function bumpSemVer(version: SemVer, bumpType: BumpType): SemVer {
+export function bumpSemVer(version: Version, bumpType: BumpType): Version {
   if (bumpType === "none") {
     return version;
   }
 
-  const bumpedVersionString = semver.inc(version, bumpType);
+  const bumpedVersionString = semver.inc(version.raw, bumpType);
   if (!bumpedVersionString) {
     throw new Error(
       `Failed to bump version ${version.version} with type ${bumpType}`,
@@ -70,7 +84,7 @@ export function bumpSemVer(version: SemVer, bumpType: BumpType): SemVer {
  * @param to - The ending version
  * @returns The bump type that would transform 'from' into 'to'
  */
-export function getBumpType(from: SemVer, to: SemVer): BumpType {
+export function getBumpType(from: Version, to: Version): BumpType {
   if (to.major > from.major) {
     return "major";
   }
@@ -113,7 +127,7 @@ export function isValidVersionString(versionString: string): boolean {
  * Creates an initial semantic version (0.0.0) for new modules or projects.
  * @returns A SemVer object representing version 0.0.0
  */
-export function createInitialVersion(): SemVer {
+export function createInitialVersion(): Version {
   return new SemVer("0.0.0");
 }
 
@@ -126,16 +140,16 @@ export function createInitialVersion(): SemVer {
  * @throws {Error} If the bump operation fails
  */
 export function bumpToPrerelease(
-  version: SemVer,
+  version: Version,
   bumpType: BumpType,
   prereleaseId: string,
-): SemVer {
+): Version {
   if (bumpType === "none") {
     // If no changes, convert current version to prerelease
     if (version.prerelease.length > 0) {
       // Already a prerelease, increment the prerelease version
       const bumpedVersionString = semver.inc(
-        version,
+        version.raw,
         "prerelease",
         prereleaseId,
       );
@@ -145,7 +159,11 @@ export function bumpToPrerelease(
       return parseSemVer(bumpedVersionString);
     } else {
       // Convert to prerelease by bumping patch and adding prerelease identifier
-      const bumpedVersionString = semver.inc(version, "prepatch", prereleaseId);
+      const bumpedVersionString = semver.inc(
+        version.raw,
+        "prepatch",
+        prereleaseId,
+      );
       if (!bumpedVersionString) {
         throw new Error(
           `Failed to create prerelease version from ${version.version}`,
@@ -171,7 +189,11 @@ export function bumpToPrerelease(
       throw new Error(`Invalid bump type for prerelease: ${bumpType}`);
   }
 
-  const bumpedVersionString = semver.inc(version, prereleaseType, prereleaseId);
+  const bumpedVersionString = semver.inc(
+    version.raw,
+    prereleaseType,
+    prereleaseId,
+  );
   if (!bumpedVersionString) {
     throw new Error(
       `Failed to bump version ${version.version} to prerelease with type ${prereleaseType}`,
@@ -186,14 +208,14 @@ export function bumpToPrerelease(
  * Build metadata is appended with a '+' sign and doesn't affect version precedence.
  * @param version - The version to add metadata to
  * @param buildMetadata - The build metadata string to append
- * @returns A new SemVer object with the build metadata appended
+ * @returns A new Version object with the build metadata appended
  */
 export function addBuildMetadata(
-  version: SemVer,
+  version: Version,
   buildMetadata: string,
-): SemVer {
+): Version {
   // Use the existing version string and append build metadata
-  const baseVersionString = version.format(); // Gets version without build metadata
+  const baseVersionString = parseSemVerInternal(version.raw).format(); // Gets version without build metadata
   const newVersionString = `${baseVersionString}+${buildMetadata}`;
 
   return parseSemVer(newVersionString);
@@ -226,7 +248,7 @@ export function generateTimestampPrereleaseId(
   return `${baseId}.${dateString}.${timeString}`;
 }
 
-export function isReleaseVersion(version: SemVer | string): boolean {
+export function isReleaseVersion(version: Version | string): boolean {
   if (typeof version === "string") {
     const parsed = semver.parse(version);
     if (!parsed) return false;

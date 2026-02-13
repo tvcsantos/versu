@@ -1,4 +1,4 @@
-import { SemVer } from "semver";
+import { Version } from "../semver";
 
 /**
  * Represents a module within a project, containing metadata, version, and dependency information.
@@ -20,7 +20,7 @@ export type Module = {
   readonly affectedModules: Set<string>;
 
   /** Current semantic version of the module. */
-  readonly version: SemVer;
+  readonly version: Version;
 
   /** Whether the version is explicitly declared in build configuration (vs inherited). */
   readonly declaredVersion: boolean;

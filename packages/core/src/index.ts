@@ -3,6 +3,9 @@
 // Configuration
 export * from './config/index.js';
 
+// Plugins
+export type { PluginContract, AdapterPluginContract } from './plugins/plugin-loader.js';
+
 // Services
 export { VersuRunner } from './services/versu-runner.js';
 export type { RunnerOptions, RunnerResult } from './services/versu-runner.js';

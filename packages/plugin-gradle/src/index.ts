@@ -1,4 +1,4 @@
-import { PluginContract } from "../../core/dist/plugins/plugin-loader.js";
+import type { PluginContract } from "@versu/core";
 import { GradleAdapterIdentifier } from "./services/gradle-adapter-identifier.js";
 import { GradleModuleSystemFactory } from "./services/gradle-module-system-factory.js";
 import { AUTHORS, VERSION } from "./utils/version.js";

@@ -16,9 +16,9 @@ import {
   generateTimestampPrereleaseId,
   maxBumpType,
   BumpType,
+  Version,
 } from "../semver/index.js";
 import { getCurrentCommitShortSha } from "../git/index.js";
-import { SemVer } from "semver";
 import { AdapterMetadata } from "./adapter-identifier.js";
 import { applySnapshotSuffix } from "../utils/versioning.js";
 import { Module } from "../adapters/project-information.js";
@@ -57,7 +57,7 @@ type ProcessingModuleChange = {
   /** The module being processed. */
   readonly module: Module;
   /** Original version before any changes. */
-  readonly fromVersion: SemVer;
+  readonly fromVersion: Version;
   /** Calculated new version string (initially empty, populated in final phase). */
   toVersion: string;
   /** Type of version bump to apply (can be upgraded during cascade processing). */
@@ -76,7 +76,7 @@ export type ProcessedModuleChange = {
   /** The module with calculated version change. */
   readonly module: Module;
   /** Original semantic version before changes. */
-  readonly fromVersion: SemVer;
+  readonly fromVersion: Version;
   /** New calculated version string (e.g., '1.1.0', '1.1.0-alpha.1', '1.1.0-SNAPSHOT'). */
   readonly toVersion: string;
   /** Final bump type applied ('major', 'minor', 'patch', or 'none'). */
@@ -383,7 +383,7 @@ export class VersionBumper {
     const processedModuleChanges: ProcessedModuleChange[] = [];
 
     for (const change of processingModuleChanges) {
-      let newVersion: SemVer = change.fromVersion;
+      let newVersion: Version = change.fromVersion;
 
       // Only apply version changes if module needs processing
       if (change.needsProcessing) {

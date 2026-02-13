@@ -1,7 +1,6 @@
-import { SemVer } from "semver";
 import { ModuleRegistry } from "./module-registry.js";
 import { VersionUpdateStrategy } from "./version-update-strategy.js";
-import { formatSemVer } from "../semver/index.js";
+import { formatSemVer, Version } from "../semver/index.js";
 
 /**
  * Manages version updates for modules with staged commits and batch persistence.
@@ -36,7 +35,7 @@ export class VersionManager {
    * @param newVersion - New version as SemVer object or string
    * @throws {Error} If module ID doesn't exist in registry
    */
-  updateVersion(moduleId: string, newVersion: SemVer | string): void {
+  updateVersion(moduleId: string, newVersion: Version | string): void {
     // Validate module exists in registry
     if (!this.moduleRegistry.hasModule(moduleId)) {
       throw new Error(`Module ${moduleId} not found`);

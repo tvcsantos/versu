@@ -1,10 +1,20 @@
-import path, { join } from 'path';
-import { fileURLToPath } from 'url';
-import { execa } from 'execa';
-import fs from 'fs/promises';
-import crypto from 'crypto';
-import fg from 'fast-glob';
-import { BaseModule, createInitialVersion, exists, logger, Module, parseProperties, parseSemVer, ProjectInformation, RawProjectInformation } from '@versu/core';
+import path, { join } from "path";
+import { fileURLToPath } from "url";
+import { execa } from "execa";
+import fs from "fs/promises";
+import crypto from "crypto";
+import fg from "fast-glob";
+import {
+  BaseModule,
+  createInitialVersion,
+  exists,
+  logger,
+  Module,
+  parseProperties,
+  parseSemVer,
+  ProjectInformation,
+  RawProjectInformation,
+} from "@versu/core";
 
 type Mutable<T> = {
   -readonly [P in keyof T]: T[P];
@@ -14,13 +24,13 @@ type Mutable<T> = {
  * Name of the Gradle wrapper script file.
  * Ensures consistent builds without requiring pre-installed Gradle.
  */
-const GRADLE_WRAPPER = 'gradlew'
+const GRADLE_WRAPPER = "gradlew";
 
 /**
  * Relative path to the Gradle initialization script within the action.
  * Injected into Gradle to collect project structure information as JSON.
  */
-const GRADLE_INIT_SCRIPT = './init-project-information.gradle.kts'
+const GRADLE_INIT_SCRIPT = "./init-project-information.gradle.kts";
 
 /**
  * Cached project information structure with hash for validation.
@@ -28,7 +38,7 @@ const GRADLE_INIT_SCRIPT = './init-project-information.gradle.kts'
 type CachedProjectInformation = {
   hash: string;
   data: GradleProjectInformation;
-}
+};
 
 /**
  * Finds all Gradle build files recursively under the project root.
@@ -38,16 +48,16 @@ type CachedProjectInformation = {
  */
 async function findGradleFiles(projectRoot: string): Promise<string[]> {
   const patterns = [
-    '**/settings.gradle',
-    '**/settings.gradle.kts',
-    '**/build.gradle',
-    '**/build.gradle.kts'
+    "**/settings.gradle",
+    "**/settings.gradle.kts",
+    "**/build.gradle",
+    "**/build.gradle.kts",
   ];
 
   const files = await fg(patterns, {
     cwd: projectRoot,
     absolute: false,
-    ignore: ['**/node_modules/**', '**/build/**', '**/.gradle/**']
+    ignore: ["**/node_modules/**", "**/build/**", "**/.gradle/**"],
   });
 
   // Sort for consistent ordering
@@ -62,15 +72,15 @@ async function findGradleFiles(projectRoot: string): Promise<string[]> {
  */
 async function computeGradleFilesHash(projectRoot: string): Promise<string> {
   const files = await findGradleFiles(projectRoot);
-  const hash = crypto.createHash('sha256');
+  const hash = crypto.createHash("sha256");
 
   for (const file of files) {
-    const content = await fs.readFile(join(projectRoot, file), 'utf-8');
+    const content = await fs.readFile(join(projectRoot, file), "utf-8");
     hash.update(file); // Include file path for uniqueness
     hash.update(content);
   }
 
-  return hash.digest('hex');
+  return hash.digest("hex");
 }
 
 /**
@@ -80,7 +90,10 @@ async function computeGradleFilesHash(projectRoot: string): Promise<string> {
  * @param outputFile - Path to output JSON file to be generated
  * @throws {Error} If initialization script not found or Gradle execution fails
  */
-async function executeGradleScript(projectRoot: string, outputFile: string): Promise<void> {
+async function executeGradleScript(
+  projectRoot: string,
+  outputFile: string,
+): Promise<void> {
   logger.info(`⚙️ Executing Gradle to collect project information...`);
   const gradlew = join(projectRoot, GRADLE_WRAPPER);
   const dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -91,30 +104,30 @@ async function executeGradleScript(projectRoot: string, outputFile: string): Pro
   if (!scriptExists) {
     throw new Error(
       `Init script not found at ${initScriptPath}. ` +
-      `Please create the ${GRADLE_INIT_SCRIPT} file.`
+        `Please create the ${GRADLE_INIT_SCRIPT} file.`,
     );
   }
 
   // Prepare Gradle command arguments
   const args = [
-    '--quiet',                // Suppress non-error output for clean JSON
-    '--console=plain',        // Disable ANSI formatting
-    '--init-script',          // Inject initialization script
+    "--quiet", // Suppress non-error output for clean JSON
+    "--console=plain", // Disable ANSI formatting
+    "--init-script", // Inject initialization script
     initScriptPath,
-    'structure',               // Custom task that outputs project structure
-    `-PprojectInfoOutput=${outputFile}`
+    "structure", // Custom task that outputs project structure
+    `-PprojectInfoOutput=${outputFile}`,
   ];
 
   // Execute Gradle wrapper with the prepared arguments
   const result = await execa(gradlew, args, {
-    cwd: projectRoot,        // Run from project root
-    reject: false            // Handle non-zero exit codes ourselves
+    cwd: projectRoot, // Run from project root
+    reject: false, // Handle non-zero exit codes ourselves
   });
 
   // Check for Gradle execution failure
   if (result.exitCode !== 0) {
     throw new Error(
-      `Gradle command failed with exit code ${result.exitCode}: ${result.stderr}`
+      `Gradle command failed with exit code ${result.exitCode}: ${result.stderr}`,
     );
   }
 
@@ -129,7 +142,10 @@ async function executeGradleScript(projectRoot: string, outputFile: string): Pro
  * @returns Promise resolving to raw project information as JSON
  * @throws {Error} If initialization script not found or Gradle execution fails
  */
-export async function getRawProjectInformation(projectRoot: string, outputFile: string): Promise<RawProjectInformation> {
+export async function getRawProjectInformation(
+  projectRoot: string,
+  outputFile: string,
+): Promise<RawProjectInformation> {
   // Step 1: Check if project-information.json exists
   const fileExists = await exists(outputFile);
 
@@ -139,14 +155,16 @@ export async function getRawProjectInformation(projectRoot: string, outputFile: 
   // Compute hash of all Gradle build files
   const currentHash = await computeGradleFilesHash(projectRoot);
   logger.debug(`🔍 Computed Gradle files hash: ${currentHash}`);
-  
+
   if (fileExists) {
-    logger.info(`💾 Cached project information found at ${outputFile}. Validating cache...`);
+    logger.info(
+      `💾 Cached project information found at ${outputFile}. Validating cache...`,
+    );
     // Step 2: File exists, check cache validity
     try {
-      const fileContent = await fs.readFile(outputFile, 'utf-8');
+      const fileContent = await fs.readFile(outputFile, "utf-8");
       const cachedData: CachedProjectInformation = JSON.parse(fileContent);
-      
+
       // Step 2.1: Compare hashes
       if (cachedData.hash === currentHash) {
         logger.info(`✅ Cache is valid. Using cached project information.`);
@@ -155,59 +173,68 @@ export async function getRawProjectInformation(projectRoot: string, outputFile: 
         data = cachedData.data;
       } else {
         logger.debug(`❌ Cache is invalid. Cached hash: ${cachedData.hash}`);
-        logger.info(`🔄 Gradle files changed, regenerating project information...`);
+        logger.info(
+          `🔄 Gradle files changed, regenerating project information...`,
+        );
       }
-      
+
       // Cache miss - hash mismatch, need to regenerate
     } catch (error) {
       // If there's any error reading/parsing cached file, regenerate
       logger.warning(`⚠️ Failed to read cached project information: ${error}`);
     }
   }
-  
+
   if (executeScript) {
     // Step 3: File doesn't exist or cache is invalid - execute Gradle script
-    const outputFile = join(projectRoot, 'build', 'project-information.json');
+    const outputFile = join(projectRoot, "build", "project-information.json");
     await executeGradleScript(projectRoot, outputFile);
-    
+
     // Verify that the output file was created
     const fileExistsAfterExec = await exists(outputFile);
     if (!fileExistsAfterExec) {
       throw new Error(
         `Expected output file not found at ${outputFile}. ` +
-        `Ensure that the Gradle init script is correctly generating the project information.`
+          `Ensure that the Gradle init script is correctly generating the project information.`,
       );
     }
 
     // Read the output file content
-    const fileContent = await fs.readFile(outputFile, 'utf-8');
+    const fileContent = await fs.readFile(outputFile, "utf-8");
     // Parse JSON output from Gradle
-    data = JSON.parse(fileContent.trim() || '{}');
+    data = JSON.parse(fileContent.trim() || "{}");
   }
-  
+
   // Compute hash and save with cache information
   const cachedData: CachedProjectInformation = {
     hash: currentHash,
-    data
+    data,
   };
 
   // Read gradle.properites and add version
-  const projectInformation = await getInformationWithVersions(projectRoot, data);
+  const projectInformation = await getInformationWithVersions(
+    projectRoot,
+    data,
+  );
 
   if (executeScript) {
     // Write back to file with hash for future cache validation
     const dirname = path.dirname(outputFile);
     await fs.mkdir(dirname, { recursive: true });
-    await fs.writeFile(outputFile, JSON.stringify(cachedData, null, 2), 'utf-8');
+    await fs.writeFile(
+      outputFile,
+      JSON.stringify(cachedData, null, 2),
+      "utf-8",
+    );
   }
-  
+
   return projectInformation;
 }
 
 // omit version and declaredVersion
-type GradleModule = Omit<BaseModule, 'version' | 'declaredVersion'> & {
+type GradleModule = Omit<BaseModule, "version" | "declaredVersion"> & {
   versionProperty: string;
-}
+};
 
 type GradleProjectInformation = {
   [id: string]: GradleModule;
@@ -220,10 +247,10 @@ type GradleProjectInformation = {
  * @returns Promise resolving to augmented RawProjectInformation with versions
  */
 async function getInformationWithVersions(
-  projectRoot: string, 
-  projectInformation: GradleProjectInformation
+  projectRoot: string,
+  projectInformation: GradleProjectInformation,
 ): Promise<RawProjectInformation> {
-  const gradlePropertiesFile = join(projectRoot, 'gradle.properties');
+  const gradlePropertiesFile = join(projectRoot, "gradle.properties");
   const gradlePropertiesExists = await exists(gradlePropertiesFile);
   const result: Mutable<RawProjectInformation> = {};
   let moduleVersions = new Map<string, string>();
@@ -237,7 +264,7 @@ async function getInformationWithVersions(
       result[moduleId] = {
         ...module,
         version: resultVersion,
-        declaredVersion: resultVersion !== undefined
+        declaredVersion: resultVersion !== undefined,
       };
     }
   }
@@ -252,17 +279,19 @@ async function getInformationWithVersions(
  * @returns Structured ProjectInformation with normalized data
  * @throws {Error} If no root module found in hierarchy
  */
-export function getProjectInformation(projectInformation: RawProjectInformation): ProjectInformation {
+export function getProjectInformation(
+  projectInformation: RawProjectInformation,
+): ProjectInformation {
   const moduleIds = Object.keys(projectInformation);
   const modules = new Map<string, Module>();
 
   // Find root module by looking for the one with type 'root'
   let rootModule: string | undefined;
   for (const [moduleId, rawModule] of Object.entries(projectInformation)) {
-    if (rawModule.type === 'root') {
+    if (rawModule.type === "root") {
       rootModule = moduleId;
     }
-    
+
     // Create normalized Module object
     const module: Module = {
       id: moduleId,
@@ -271,14 +300,15 @@ export function getProjectInformation(projectInformation: RawProjectInformation)
       type: rawModule.type,
       affectedModules: new Set(rawModule.affectedModules),
       // Parse version if present, otherwise create initial version
-      version: rawModule.version === undefined ?
-        createInitialVersion() :
-        parseSemVer(rawModule.version),
+      version:
+        rawModule.version === undefined
+          ? createInitialVersion()
+          : parseSemVer(rawModule.version),
       declaredVersion: rawModule.declaredVersion,
     };
 
-    if ('versionProperty' in rawModule) {
-      module['versionProperty'] = rawModule.versionProperty;
+    if ("versionProperty" in rawModule) {
+      module["versionProperty"] = rawModule.versionProperty;
     }
 
     modules.set(moduleId, module);
@@ -287,14 +317,14 @@ export function getProjectInformation(projectInformation: RawProjectInformation)
   // Validate that a root module was found
   if (!rootModule) {
     throw new Error(
-      'No root module found in hierarchy. ' +
-      'Every project hierarchy must contain exactly one module with type "root".'
+      "No root module found in hierarchy. " +
+        'Every project hierarchy must contain exactly one module with type "root".',
     );
   }
 
   return {
     moduleIds,
     modules,
-    rootModule
+    rootModule,
   };
 }
