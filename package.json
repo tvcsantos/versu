@@ -1,6 +1,6 @@
 {
   "name": "versu",
-  "version": "0.5.1",
+  "version": "0.6.0",
   "description": "VERSU",
   "private": true,
   "workspaces": [

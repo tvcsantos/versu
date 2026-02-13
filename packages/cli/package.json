@@ -1,6 +1,6 @@
 {
   "name": "@versu/cli",
-  "version": "0.5.1",
+  "version": "0.6.0",
   "description": "VERSU (CLI)",
   "type": "module",
   "main": "dist/index.js",
@@ -38,7 +38,7 @@
   "types": "dist/index.d.ts",
   "dependencies": {
     "@oclif/core": "^4.8.0",
-    "@versu/core": "^0.5.1",
+    "@versu/core": "^0.6.0",
     "oclif": "^4.14.0"
   },
   "devDependencies": {
