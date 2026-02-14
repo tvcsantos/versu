@@ -12,7 +12,7 @@ _Compose the epic of your code, one release at a time._
 
 Whether you're working on a monorepo with dozens of interdependent modules or a simple single-module project, VERSU adapts to your workflow. Use it as a library in your custom tools, as a CLI in your terminal, or as a GitHub Action in your CI/CD pipeline. With its extensible plugin architecture, VERSU supports any build system or language ecosystem.
 
-## Key Features
+## 🔑 Key Features
 
 <!-- markdownlint-disable MD033 -->
 
@@ -26,7 +26,7 @@ Whether you're working on a monorepo with dozens of interdependent modules or a 
 
 <!-- markdownlint-enable MD033 -->
 
-## Why VERSU?
+## 🤔 Why VERSU?
 
 ### 🎯 The Problem
 
@@ -85,7 +85,7 @@ Gradle adapter plugin that provides support for detecting and updating versions 
 
 **Use when:** Working with Gradle-based projects and need version management support.
 
-## Commit Message Format
+## 📝 Commit Message Format
 
 VERSU uses [Conventional Commits](https://conventionalcommits.org/) to automatically determine version bumps:
 
@@ -105,19 +105,19 @@ VERSU uses [Conventional Commits](https://conventionalcommits.org/) to automatic
 
 > **Note:** Version bump rules are fully configurable via [configuration files](packages/core#configuration).
 
-## Extending
+## 🔌 Extending
 
 To add support for new project types, see the [core package documentation](packages/core#creating-custom-adapters) for instructions on creating custom adapter plugins. Reference [@versu/plugin-gradle](packages/plugin-gradle) as an example implementation.
 
-## Development
+## 🛠️ Development
 
-### Requirements
+### ✔️ Requirements
 
 - [nvm](https://github.com/nvm-sh/nvm) or [fnm](https://github.com/Schniz/fnm) (Node version manager)
 - Node.js (see [.nvmrc](.nvmrc))
 - npm
 
-### Setup
+### ⚙️ Setup
 
 ```bash
 npm install    # Install dependencies
@@ -125,7 +125,7 @@ npm run build  # Build all packages
 npm test       # Run tests
 ```
 
-### Monorepo Structure
+### 📁 Monorepo Structure
 
 ```text
 packages/
@@ -144,6 +144,6 @@ packages/
 
 Each package has its own README with detailed documentation. The monorepo uses npm workspaces for dependency management.
 
-## License
+## 📄 License
 
 MIT License - see [LICENSE](LICENSE) for details.
