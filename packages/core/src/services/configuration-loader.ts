@@ -15,7 +15,7 @@ export class ConfigurationLoader {
    * Creates a new configuration loader.
    * @param configurationValidator - Validator to ensure configuration integrity
    */
-  constructor(private readonly configurationValidator: ConfigurationValidator) {
+  constructor(private readonly configurationValidator: ConfigurationValidator<Config>) {
     // Initialize cosmiconfig explorer once for reuse across multiple loads
     this.explorer = cosmiconfig("versu", { searchStrategy: "global" });
   }

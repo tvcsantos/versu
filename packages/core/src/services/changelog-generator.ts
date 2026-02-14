@@ -34,17 +34,13 @@ export class ChangelogGenerator {
 
     logger.info("📚 Generating changelogs...");
 
-    /*if (this.options.dryRun) {
-      logger.info("🏃‍♂️ Dry run mode - changelogs will not be written to files");
-      return [];
-    }*/
-
     // Generate individual module changelogs
     const changelogPaths = await generateChangelogsForModules(
       moduleResults,
       async (moduleId) =>
         moduleCommits.get(moduleId) || { commits: [], lastTag: null },
       this.options.repoRoot,
+      this.options.dryRun,
       this.options.config?.module,
     );
 
@@ -54,6 +50,7 @@ export class ChangelogGenerator {
       async (moduleId) =>
         moduleCommits.get(moduleId) || { commits: [], lastTag: null },
       this.options.repoRoot,
+      this.options.dryRun,
       this.options.config?.root,
     );
 

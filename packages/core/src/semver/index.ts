@@ -18,15 +18,24 @@ export type Version = {
 };
 
 /**
- * Parses a semantic version string into a SemVer object.
+ * Parses a semantic version string into a Version object.
  * @param versionString - The version string to parse (e.g., '1.2.3', '2.0.0-beta.1')
- * @returns A parsed SemVer object with structured version components
+ * @returns A parsed Version object with structured version components
  * @throws {Error} If the version string is invalid or cannot be parsed
  */
 export function parseSemVer(versionString: string): Version {
   return parseSemVerInternal(versionString);
 }
 
+/**
+ * Parses a semantic version string and returns a SemVer object.
+ *
+ * @param versionString - The semantic version string to parse (e.g., "1.2.3", "2.0.0-beta.1")
+ * @returns A parsed SemVer object containing the version components
+ * @throws {Error} When the provided version string is not a valid semantic version
+ *
+ * @internal
+ */
 function parseSemVerInternal(versionString: string): SemVer {
   const parsed = semver.parse(versionString);
 
@@ -38,8 +47,8 @@ function parseSemVerInternal(versionString: string): SemVer {
 }
 
 /**
- * Converts a SemVer object to its string representation.
- * @param version - The SemVer object to format
+ * Converts a Version object to its string representation.
+ * @param version - The Version object to format
  * @returns The version as a string, preserving all components including build metadata
  */
 export function formatSemVer(version: Version): string {
@@ -60,7 +69,7 @@ export function compareSemVer(a: Version, b: Version): number {
  * Increments a semantic version based on the specified bump type.
  * @param version - The version to bump
  * @param bumpType - The type of version increment to apply
- * @returns A new SemVer object with the incremented version
+ * @returns A new Version object with the incremented version
  * @throws {Error} If the version cannot be bumped with the specified type
  */
 export function bumpSemVer(version: Version, bumpType: BumpType): Version {
@@ -125,7 +134,7 @@ export function isValidVersionString(versionString: string): boolean {
 
 /**
  * Creates an initial semantic version (0.0.0) for new modules or projects.
- * @returns A SemVer object representing version 0.0.0
+ * @returns A Version object representing version 0.0.0
  */
 export function createInitialVersion(): Version {
   return new SemVer("0.0.0");
@@ -136,7 +145,7 @@ export function createInitialVersion(): Version {
  * @param version - The version to bump to prerelease
  * @param bumpType - The type of version bump to apply before adding prerelease identifier
  * @param prereleaseId - The prerelease identifier (e.g., 'alpha', 'beta', 'rc')
- * @returns A new SemVer object with the prerelease version
+ * @returns A new Version object with the prerelease version
  * @throws {Error} If the bump operation fails
  */
 export function bumpToPrerelease(
@@ -215,7 +224,8 @@ export function addBuildMetadata(
   buildMetadata: string,
 ): Version {
   // Use the existing version string and append build metadata
-  const baseVersionString = parseSemVerInternal(version.raw).format(); // Gets version without build metadata
+  // Get version without build metadata
+  const baseVersionString = parseSemVerInternal(version.raw).format();
   const newVersionString = `${baseVersionString}+${buildMetadata}`;
 
   return parseSemVer(newVersionString);

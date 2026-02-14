@@ -1,4 +1,4 @@
-import { ModuleDetector, ModuleRegistry } from "@versu/core";
+import { ModuleDetector, type ProjectInformation } from "@versu/core";
 import {
   getRawProjectInformation,
   getProjectInformation,
@@ -20,7 +20,7 @@ export class GradleModuleDetector implements ModuleDetector {
    * @returns ModuleRegistry containing all discovered modules and their relationships
    * @throws {Error} If Gradle execution fails or project information cannot be parsed
    */
-  async detect(): Promise<ModuleRegistry> {
+  async detect(): Promise<ProjectInformation> {
     // Step 1: Execute Gradle and collect raw project structure data
     const rawProjectInformation = await getRawProjectInformation(
       this.repoRoot,
@@ -31,6 +31,6 @@ export class GradleModuleDetector implements ModuleDetector {
     const projectInformation = getProjectInformation(rawProjectInformation);
 
     // Step 3: Create a registry for efficient module access and querying
-    return new ModuleRegistry(projectInformation);
+    return projectInformation;
   }
 }

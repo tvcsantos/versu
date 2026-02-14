@@ -1,10 +1,10 @@
-import { ModuleRegistry } from "./module-registry.js";
+import type { ProjectInformation } from "../adapters/project-information.js";
 
 /**
  * Interface for detecting modules in a multi-module repository.
  *
  * @remarks
- * Transforms repository file structure into a structured {@link ModuleRegistry}.
+ * Transforms repository file structure into a structured {@link ProjectInformation}.
  * Different implementations exist for different build systems (Gradle, Maven, npm).
  * Created by {@link ModuleSystemFactory}.
  */
@@ -16,10 +16,10 @@ export interface ModuleDetector {
   readonly repoRoot: string;
 
   /**
-   * Detects all modules in the repository and returns a populated module registry.
+   * Detects all modules in the repository and returns a populated project information object.
    *
-   * @returns Promise resolving to {@link ModuleRegistry} with all discovered modules
+   * @returns Promise resolving to {@link ProjectInformation} with all discovered modules
    * @throws {Error} If repository is invalid, build files are missing, or detection fails
    */
-  detect(): Promise<ModuleRegistry>;
+  detect(): Promise<ProjectInformation>;
 }

@@ -1,5 +1,5 @@
 /**
- * Git operations module for VERSU version management.
+ * Git operations module for version management.
  * Provides interfaces for commit analysis, tagging, and conventional commit parsing.
  * Supports monorepo and multi-module projects with module-specific tag management.
  */
@@ -149,6 +149,28 @@ export async function getCommitsSinceLastTag(
   }
 }
 
+const GIT_LOG_SPLIT_DELIMITER = "---COMMIT-END---";
+
+const BREAKING_CHANGE_NOTE_TITLE = "BREAKING CHANGE";
+
+const GIT_LOG_FORMAT = [
+  "%s", // subject
+  "%b", // body
+  "-hash-", // delimiter for hash
+  "%H", // full commit hash
+  "-decorations-", // delimiter for decorations
+  "%D", // ref names (tags, branches)
+  "-authorName-", // delimiter for author name
+  "%an", // author name
+  "-authorEmail-", // delimiter for author email
+  "%ae", // author email
+  "-committerName-", // delimiter for committer name
+  "%cn", // committer name
+  "-committerEmail-", // delimiter for committer email
+  "%ce", // committer email
+  GIT_LOG_SPLIT_DELIMITER, // delimiter for end of commit
+];
+
 /**
  * Retrieves commits within a specific git revision range with path filtering.
  * Uses git's native pathspec syntax for efficient filtering in monorepos.
@@ -174,10 +196,7 @@ export async function getCommitsInRange(
   try {
     // Build git log command with custom format for easy parsing
     // Format: hash, subject, body, delimiter
-    const args = [
-      "log",
-      "--format=%s%n%b%n-hash-%n%H%n-decorations-%n%D%n-authorName-%n%an%n-authorEmail-%n%ae%n-committerName-%n%cn%n-committerEmail-%n%ce%n---COMMIT-END---",
-    ];
+    const args = ["log", `--format=${GIT_LOG_FORMAT.join("%n")}`];
 
     // Only add range if it's not empty
     // Empty range means "all commits" which is valid
@@ -240,7 +259,7 @@ function parseGitLog(output: string): Commit[] {
   // Split output into individual commit blocks using custom delimiter
   // Filter removes empty blocks (trailing delimiters, etc.)
   const commitBlocks = output
-    .split("---COMMIT-END---")
+    .split(GIT_LOG_SPLIT_DELIMITER)
     .filter((block) => block.trim());
 
   for (const block of commitBlocks) {
@@ -260,7 +279,8 @@ function parseGitLog(output: string): Commit[] {
 
 export function isBreakingCommit(commit: Commit): boolean {
   return (
-    commit?.notes?.some((note) => note.title === "BREAKING CHANGE") || false
+    commit?.notes?.some((note) => note.title === BREAKING_CHANGE_NOTE_TITLE) ||
+    false
   );
 }
 
@@ -764,6 +784,20 @@ export async function hasChangesToCommit(
   }
 }
 
+/**
+ * Retrieves the URL of the current Git repository's 'origin' remote.
+ *
+ * This function executes a Git command to fetch the URL of the 'origin' remote
+ * for the repository in the specified working directory.
+ *
+ * @param options - Configuration options for the Git operation
+ * @param options.cwd - The working directory where the Git command should be executed.
+ *                      Defaults to the current working directory if not specified.
+ *
+ * @returns A promise that resolves to the trimmed URL string of the 'origin' remote
+ *
+ * @throws {Error} If the Git command fails or the repository URL cannot be retrieved
+ */
 export async function getCurrentRepoUrl(
   options: GitOptions = {},
 ): Promise<string> {

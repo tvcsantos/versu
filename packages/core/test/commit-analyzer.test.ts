@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { CommitAnalyzer } from '../src/services/commit-analyzer.js';
 import * as gitIndex from '../src/git/index.js';
 import { parseSemVer } from '../src/semver/index.js';
-import { ModuleRegistry } from '../src/services/module-registry.js';
+import { MapModuleRegistry, ModuleRegistry } from '../src/services/module-registry.js';
 import { Module, ProjectInformation } from '../src/adapters/project-information.js';
 import { Commit } from 'conventional-commits-parser';
 
@@ -57,7 +57,7 @@ describe('CommitAnalyzer - Child Module Exclusion', () => {
         rootModule: ':',
       };
 
-      moduleRegistry = new ModuleRegistry(hierarchyResult);
+      moduleRegistry = new MapModuleRegistry(hierarchyResult);
 
       // Mock commits - git will handle exclusion natively
       const coreCommits: Commit[] = [
@@ -138,7 +138,7 @@ describe('CommitAnalyzer - Child Module Exclusion', () => {
         rootModule: ':',
       };
 
-      moduleRegistry = new ModuleRegistry(hierarchyResult);
+      moduleRegistry = new MapModuleRegistry(hierarchyResult);
 
       vi.mocked(gitIndex.getCommitsSinceLastTag).mockImplementation(
         async (projectInfo, options, excludePaths = []) => {
@@ -205,7 +205,7 @@ describe('CommitAnalyzer - Child Module Exclusion', () => {
         rootModule: ':',
       };
 
-      moduleRegistry = new ModuleRegistry(hierarchyResult);
+      moduleRegistry = new MapModuleRegistry(hierarchyResult);
 
       const rootCommits: Commit[] = [
         { hash: 'root123', type: 'feat', subject: 'update root build file' } as unknown as Commit,
@@ -259,7 +259,7 @@ describe('CommitAnalyzer - Child Module Exclusion', () => {
         rootModule: ':',
       };
 
-      moduleRegistry = new ModuleRegistry(hierarchyResult);
+      moduleRegistry = new MapModuleRegistry(hierarchyResult);
 
       const utilsCommits: Commit[] = [
         { hash: 'utils123', type: 'feat', subject: 'add util' } as unknown as Commit,

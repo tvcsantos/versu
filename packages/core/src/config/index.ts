@@ -13,33 +13,22 @@ const bumpTypeSchema = z.enum(["major", "minor", "patch", "none"]);
  * Zod schema for BumpType or 'ignore' values.
  * Used for commit type mappings where 'ignore' is allowed.
  */
-const bumpTypeOrIgnoreSchema = z.enum([
-  "major",
-  "minor",
-  "patch",
-  "none",
-  "ignore",
-]);
+const bumpTypeOrIgnoreSchema = z.union([bumpTypeSchema, z.literal("ignore")]);
 
 /**
  * Zod schema for DependencyRules configuration.
  * Validates that dependency cascade rules use valid bump types.
  */
 const dependencyRulesSchema = z.object({
-  onMajorOfDependency: bumpTypeSchema,
-  onMinorOfDependency: bumpTypeSchema,
-  onPatchOfDependency: bumpTypeSchema,
+  major: bumpTypeSchema,
+  minor: bumpTypeSchema,
+  patch: bumpTypeSchema,
 });
 
 /**
- * Zod schema for NodeJSConfig configuration.
- * Validates Node.js-specific settings.
+ * Zod schema for Changelog configuration.
+ * Validates the structure of changelog options and context.
  */
-const nodeJSConfigSchema = z.object({
-  versionSource: z.array(z.literal("package.json")),
-  updatePackageLock: z.boolean(),
-});
-
 export const changelogSchema = z
   .object({
     context: z
@@ -57,6 +46,7 @@ export const changelogSchema = z
         headerPartial: z.string().optional(),
         footerPartial: z.string().optional(),
       })
+      .loose()
       .optional(),
   })
   .optional();
@@ -67,10 +57,11 @@ export const changelogSchema = z
  * configuration with detailed error messages for invalid configurations.
  */
 export const configSchema = z.object({
-  defaultBump: bumpTypeSchema,
-  commitTypes: z.record(z.string(), bumpTypeOrIgnoreSchema),
-  dependencyRules: dependencyRulesSchema,
-  nodejs: nodeJSConfigSchema.optional(),
+  versionRules: z.object({
+    defaultBump: bumpTypeSchema,
+    commitTypeBumps: z.record(z.string(), bumpTypeOrIgnoreSchema),
+    dependencyBumps: dependencyRulesSchema,
+  }),
   plugins: z.array(z.string()).optional().default([]),
   changelog: z
     .object({
@@ -81,7 +72,7 @@ export const configSchema = z.object({
 });
 
 /**
- * Configuration for VERSU version bumping behavior.
+ * Configuration for version bumping behavior.
  * Controls commit type handling, dependency cascade rules, and adapter-specific settings.
  */
 export type Config = z.infer<typeof configSchema>;
@@ -93,33 +84,30 @@ export type Config = z.infer<typeof configSchema>;
 export type DependencyRules = z.infer<typeof dependencyRulesSchema>;
 
 /**
- * Configuration for Node.js/npm projects.
- */
-export type NodeJSConfig = z.infer<typeof nodeJSConfigSchema>;
-
-/**
- * Default VERSU configuration following Conventional Commits specification.
+ * Default configuration following Conventional Commits specification.
  * Maps common commit types to semantic version bumps and defines dependency cascade rules.
  */
 export const DEFAULT_CONFIG: Config = {
-  defaultBump: "patch",
-  commitTypes: {
-    feat: "minor",
-    fix: "patch",
-    perf: "patch",
-    refactor: "patch",
-    docs: "ignore",
-    test: "ignore",
-    chore: "ignore",
-    style: "ignore",
-    ci: "ignore",
-    build: "ignore",
-  },
   plugins: [],
-  dependencyRules: {
-    onMajorOfDependency: "major",
-    onMinorOfDependency: "minor",
-    onPatchOfDependency: "patch",
+  versionRules: {
+    defaultBump: "patch",
+    commitTypeBumps: {
+      feat: "minor",
+      fix: "patch",
+      perf: "patch",
+      refactor: "patch",
+      docs: "ignore",
+      test: "ignore",
+      chore: "ignore",
+      style: "ignore",
+      ci: "ignore",
+      build: "ignore",
+    },
+    dependencyBumps: {
+      major: "major",
+      minor: "minor",
+      patch: "patch",
+    },
   },
 };
 
@@ -137,13 +125,13 @@ export function getBumpTypeForCommit(commit: Commit, config: Config): BumpType {
 
   const commitType = commit.type || "unknown";
 
-  const configuredBump = config.commitTypes[commitType];
+  const configuredBump = config.versionRules.commitTypeBumps[commitType];
 
   if (configuredBump === "ignore") {
     return "none";
   }
 
-  return configuredBump || config.defaultBump;
+  return configuredBump || config.versionRules.defaultBump;
 }
 
 /**
@@ -157,15 +145,15 @@ export function getDependencyBumpType(
   dependencyBumpType: BumpType,
   config: Config,
 ): BumpType {
-  const rules = config.dependencyRules;
+  const rules = config.versionRules.dependencyBumps;
 
   switch (dependencyBumpType) {
     case "major":
-      return rules.onMajorOfDependency;
+      return rules.major;
     case "minor":
-      return rules.onMinorOfDependency;
+      return rules.minor;
     case "patch":
-      return rules.onPatchOfDependency;
+      return rules.patch;
     default:
       return "none";
   }

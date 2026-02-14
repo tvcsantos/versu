@@ -1,9 +1,11 @@
-import { AdapterIdentifier } from "../services/adapter-identifier.js";
-import { ModuleSystemFactory } from "../services/module-system-factory.js";
 import * as path from "path";
 import { execa } from "execa";
 import { exists } from "../utils/file.js";
 import { logger } from "../utils/logger.js";
+import type { AdapterIdentifier } from "../services/adapter-identifier.js";
+import type { ModuleSystemFactory } from "../services/module-system-factory.js";
+import { ConfigurationValidatorFactory } from "../services/configuration-validator.js";
+import { pluginContractSchema } from "./plugin-schema.js";
 
 export type PluginContract = {
   id: string;
@@ -25,10 +27,13 @@ export type PluginLoaderOptions = {
 };
 
 export class PluginLoader {
-  private readonly _plugins: Map<string, PluginContract> = new Map();
+  private readonly pluginsMap: Map<string, PluginContract> = new Map();
+  private readonly pluginValidator = ConfigurationValidatorFactory.create<PluginContract>(
+    pluginContractSchema,
+  );
 
   get plugins(): PluginContract[] {
-    return Array.from(this._plugins.values());
+    return Array.from(this.pluginsMap.values());
   }
 
   /**
@@ -92,18 +97,9 @@ export class PluginLoader {
         : absolutePath;
       const rawModule = await import(importPath);
 
-      // Handle both "export default" and "module.exports"
-      const plugin: PluginContract = rawModule.default;
+      const plugin = this.pluginValidator.validate(rawModule.default);
 
-      const isValid = this.isValidPlugin(plugin);
-      const isAlreadyLoaded = this._plugins.has(plugin.id);
-
-      if (!isValid) {
-        logger.error(
-          `❌ Invalid plugin structure at ${absolutePath}. Missing required properties or methods.`,
-        );
-        return;
-      }
+      const isAlreadyLoaded = this.pluginsMap.has(plugin.id);
 
       if (isAlreadyLoaded) {
         logger.warning(
@@ -112,7 +108,7 @@ export class PluginLoader {
         return;
       }
 
-      this._plugins.set(plugin.id, plugin);
+      this.pluginsMap.set(plugin.id, plugin);
       logger.info(`✅ Loaded: ${plugin.name}`);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : String(err);
@@ -123,10 +119,5 @@ export class PluginLoader {
         },
       );
     }
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private isValidPlugin(plugin: any): plugin is PluginContract {
-    return true; // TODO implement validation logic
   }
 }

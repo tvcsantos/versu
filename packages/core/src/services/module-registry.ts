@@ -1,4 +1,17 @@
-import { Module, ProjectInformation } from "../adapters/project-information.js";
+import type { Module, ProjectInformation } from "../adapters/project-information.js";
+
+/**
+ * Registry interface for managing and accessing modules within the application.
+ * 
+ * This interface provides methods to query, retrieve, and check the existence of modules
+ * by their unique identifiers. It serves as a central point for module management.
+ */
+export interface ModuleRegistry {
+  getModuleIds(): string[];
+  getModule(moduleId: string): Module;
+  hasModule(moduleId: string): boolean;
+  getModules(): ReadonlyMap<string, Module>;
+}
 
 /**
  * Registry for managing module hierarchy and metadata.
@@ -7,7 +20,7 @@ import { Module, ProjectInformation } from "../adapters/project-information.js";
  * Wraps {@link ProjectInformation} with a clean API for querying module data.
  * Provides fast O(1) lookup by module ID.
  */
-export class ModuleRegistry {
+export class MapModuleRegistry implements ModuleRegistry {
   /**
    * Creates a new ModuleRegistry.
    *

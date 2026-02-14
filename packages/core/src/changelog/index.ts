@@ -58,6 +58,7 @@ export async function generateChangelogsForModules(
     moduleId: string,
   ) => Promise<{ commits: Commit[]; lastTag: string | null }>,
   repoRoot: string,
+  dryRun: boolean,
   config?: ModuleChangelogConfig,
 ): Promise<string[]> {
   const changelogPaths: string[] = [];
@@ -119,13 +120,17 @@ export async function generateChangelogsForModules(
       config?.options as Options<Commit>,
     );
 
-    logger.info(changelogContent);
-
-    await updateChangelogFile(
-      changelogContent,
-      changelogPath,
-      prependPlaceholder,
-    );
+    if (dryRun) {
+      logger.info(
+        `🏃‍♂️ Dry run mode - skipping writing changelog for module ${moduleResult.id} to file`,
+      );
+    } else {
+      await updateChangelogFile(
+        changelogContent,
+        changelogPath,
+        prependPlaceholder,
+      );
+    }
 
     changelogPaths.push(changelogPath);
   }
@@ -139,6 +144,7 @@ export async function generateRootChangelog(
     moduleId: string,
   ) => Promise<{ commits: Commit[]; lastTag: string | null }>,
   repoRoot: string,
+  dryRun: boolean,
   config?: ModuleChangelogConfig,
 ): Promise<string | undefined> {
   const moduleResult = moduleResults.find((result) => result.type === "root");
@@ -161,13 +167,6 @@ export async function generateRootChangelog(
   }
 
   const contextRepository = await buildContextRepository({ cwd: repoRoot });
-
-  /*if (!moduleResult.declaredVersion) {
-      logger.info(
-        `Module ${moduleResult.id} has no declared version, skipping changelog generation...`,
-      );
-      return;
-    }*/
 
   const { commits, lastTag } = await getCommitsForModule(moduleResult.id);
 
@@ -207,13 +206,17 @@ export async function generateRootChangelog(
     config?.options as Options<Commit>,
   );
 
-  logger.info(changelogContent);
-
-  await updateChangelogFile(
-    changelogContent,
-    changelogPath,
-    prependPlaceholder,
-  );
+  if (dryRun) {
+    logger.info(
+      `🏃‍♂️ Dry run mode - skipping writing changelog for module ${moduleResult.id} to file`,
+    );
+  } else {
+    await updateChangelogFile(
+      changelogContent,
+      changelogPath,
+      prependPlaceholder,
+    );
+  }
 
   return changelogPath;
 }

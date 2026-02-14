@@ -1,12 +1,10 @@
 import { logger } from "../utils/logger.js";
 import { ModuleSystemFactory } from "./module-system-factory.js";
-import { ModuleRegistry } from "./module-registry.js";
+import { MapModuleRegistry, type ModuleRegistry } from "./module-registry.js";
 import { VersionManager } from "./version-manager.js";
 import { createModuleSystemFactory } from "../factories/module-system-factory.js";
-import { Config } from "../config/index.js";
+import { type Config, configSchema } from "../config/index.js";
 import { isWorkingDirectoryClean } from "../git/index.js";
-
-// Service imports
 import { ConfigurationLoader } from "./configuration-loader.js";
 import { CommitAnalyzer } from "./commit-analyzer.js";
 import { VersionBumper, VersionBumperOptions } from "./version-bumper.js";
@@ -22,7 +20,7 @@ import { AdapterMetadataProvider } from "./adapter-metadata-provider.js";
 import { AdapterIdentifierRegistry } from "./adapter-identifier-registry.js";
 import { createAdapterIdentifierRegistry } from "../factories/adapter-identifier-registry.js";
 import { Module } from "../adapters/project-information.js";
-import { ConfigurationValidator } from "./configuration-validator.js";
+import { ConfigurationValidatorFactory } from "./configuration-validator.js";
 import { banner } from "../utils/banner.js";
 import path from "path";
 import { PluginLoader } from "../plugins/plugin-loader.js";
@@ -77,7 +75,7 @@ export class VersuRunner {
 
     // Initialize services
     this.configurationLoader = new ConfigurationLoader(
-      new ConfigurationValidator(),
+      ConfigurationValidatorFactory.create<Config>(configSchema),
     );
   }
 
@@ -191,7 +189,7 @@ export class VersuRunner {
     const detector = this.moduleSystemFactory.createDetector(
       path.resolve(path.join(configDirectory, "project-information.json")),
     );
-    this.moduleRegistry = await detector.detect();
+    this.moduleRegistry = new MapModuleRegistry(await detector.detect());
 
     // Log discovered modules through hierarchy manager
     const moduleIds = this.moduleRegistry.getModuleIds();
