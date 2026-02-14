@@ -19,7 +19,7 @@ Whether you're working on a monorepo with dozens of interdependent modules or a 
 ✅ **Conventional Commits Parsing** - Automatically determines version bumps based on commit messages<br>
 ✅ **Multi-Module Support** - Each module can be versioned independently<br>
 ✅ **Dependency Cascade** - When a dependency changes, dependents are automatically bumped<br>
-✅ **Changelog Generation** - Automatic per-module changelog generation from commit history<br>
+✅ **Changelog Generation** - Automatic per-module changelog generation from commit history fully customizable<br>
 ✅ **Pre-release Support** - Generate alpha, beta, rc, or custom pre-release versions<br>
 ✅ **Multiple Interfaces** - Use as a library, CLI tool, or GitHub Action<br>
 ✅ **Plugin Architecture** - Extensible design for supporting any build system or ecosystem
