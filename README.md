@@ -42,7 +42,7 @@ Managing versions in multi-module projects is painful:
 
 VERSU automates the entire versioning lifecycle:
 
-- **Zero manual decisions** - Your commit messages (`feat:`, `fix:`, `BREAKING CHANGE:`) dictate version bumps automatically
+- **Zero manual decisions** - Your commit messages dictate version bumps automatically
 - **Smart dependency tracking** - When a module changes, VERSU automatically identifies and versions all dependents
 - **Team consistency** - Everyone follows the same Conventional Commits standard, ensuring uniform versioning
 - **Generated changelogs** - Beautiful, accurate changelogs generated per-module from commit history
