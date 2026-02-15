@@ -13,11 +13,37 @@ function formatMessage(
 
   const entries = Object.entries(context);
   
-  // Calculate inline length
+  // Check if we have any arrays
+  const hasArrays = entries.some(([_, value]) => Array.isArray(value) && value.length > 0);
+  
+  // If we have arrays, always use multi-line format
+  if (hasArrays) {
+    const lines: string[] = [];
+    
+    for (const [key, value] of entries) {
+      if (Array.isArray(value)) {
+        if (value.length === 0) {
+          lines.push(`  ${key}: none`);
+        } else {
+          lines.push(`  ${key}:`);
+          value.forEach(item => {
+            lines.push(`    - ${item}`);
+          });
+        }
+      } else {
+        const valueStr = typeof value === "object" && value !== null
+          ? JSON.stringify(value)
+          : String(value);
+        lines.push(`  ${key}: ${valueStr}`);
+      }
+    }
+    
+    return `${result}\n${lines.join("\n")}`;
+  }
+  
+  // Calculate inline length for non-array entries
   const totalLength = entries.reduce((sum, [key, value]) => {
-    const valueStr = Array.isArray(value) 
-      ? value.join(", ") 
-      : typeof value === "object" && value !== null
+    const valueStr = typeof value === "object" && value !== null
       ? JSON.stringify(value)
       : String(value);
     return sum + key.length + valueStr.length;
@@ -27,9 +53,7 @@ function formatMessage(
   if (entries.length <= 3 && totalLength < 80) {
     const inline = entries
       .map(([key, value]) => {
-        const valueStr = Array.isArray(value)
-          ? value.join(", ")
-          : typeof value === "object" && value !== null
+        const valueStr = typeof value === "object" && value !== null
           ? JSON.stringify(value)
           : String(value);
         return `${key}=${valueStr}`;
@@ -41,9 +65,7 @@ function formatMessage(
   // Use multi-line format for complex cases
   const multiline = entries
     .map(([key, value]) => {
-      const valueStr = Array.isArray(value)
-        ? value.join(", ")
-        : typeof value === "object" && value !== null
+      const valueStr = typeof value === "object" && value !== null
         ? JSON.stringify(value)
         : String(value);
       return `  ${key}: ${valueStr}`;

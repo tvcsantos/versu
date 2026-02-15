@@ -17,16 +17,42 @@ function indent(str: string, spaces: number): string {
 function formatContext(context?: Record<string, unknown>, baseIndent = 0): string {
   if (!context || Object.keys(context).length === 0) return "";
 
-  const entries = Object.entries(context).map(([key, value]) => {
+  const entries = Object.entries(context);
+  
+  // Check if we have any arrays
+  const hasArrays = entries.some(([_, value]) => Array.isArray(value) && value.length > 0);
+  
+  // If we have arrays, always use multi-line format with list items
+  if (hasArrays) {
+    const lineIndent = " ".repeat(baseIndent + 2);
+    const itemIndent = " ".repeat(baseIndent + 4);
+    const lines: string[] = [];
+    
+    for (const [key, value] of entries) {
+      if (Array.isArray(value)) {
+        if (value.length === 0) {
+          lines.push(`${lineIndent}${chalk.dim(key)}: ${chalk.cyan("none")}`);
+        } else {
+          lines.push(`${lineIndent}${chalk.dim(key)}:`);
+          value.forEach(item => {
+            lines.push(`${itemIndent}${chalk.dim("•")} ${chalk.cyan(String(item))}`);
+          });
+        }
+      } else {
+        const valueStr = typeof value === "object" && value !== null
+          ? JSON.stringify(value)
+          : String(value);
+        lines.push(`${lineIndent}${chalk.dim(key)}: ${chalk.cyan(valueStr)}`);
+      }
+    }
+    
+    return "\n" + lines.join("\n");
+  }
+
+  const processedEntries = entries.map(([key, value]) => {
     let formattedValue: string;
     
-    if (Array.isArray(value)) {
-      if (value.length === 0) {
-        formattedValue = "none";
-      } else {
-        formattedValue = value.join(", ");
-      }
-    } else if (typeof value === "object" && value !== null) {
+    if (typeof value === "object" && value !== null) {
       formattedValue = JSON.stringify(value);
     } else {
       formattedValue = String(value);
@@ -36,12 +62,12 @@ function formatContext(context?: Record<string, unknown>, baseIndent = 0): strin
   });
 
   // Calculate total inline length
-  const totalLength = entries.reduce((sum, e) => sum + e.length, 0);
-  const hasLongValue = entries.some(e => e.formattedValue.length > 50);
+  const totalLength = processedEntries.reduce((sum, e) => sum + e.length, 0);
+  const hasLongValue = processedEntries.some(e => e.formattedValue.length > 50);
   
   // Use inline format for simple cases: <= 3 keys and reasonable total length
-  if (entries.length <= 3 && totalLength < 80 && !hasLongValue) {
-    const inline = entries
+  if (processedEntries.length <= 3 && totalLength < 80 && !hasLongValue) {
+    const inline = processedEntries
       .map(e => `${chalk.dim(e.key)}=${chalk.cyan(e.formattedValue)}`)
       .join(" ");
     return ` ${chalk.dim("(")}${inline}${chalk.dim(")")}`;
@@ -50,7 +76,7 @@ function formatContext(context?: Record<string, unknown>, baseIndent = 0): strin
   // Use multi-line format for complex cases
   // Account for base indentation + icon (2 chars: "ℹ ")
   const lineIndent = " ".repeat(baseIndent + 2);
-  const multiline = entries
+  const multiline = processedEntries
     .map(e => `${lineIndent}${chalk.dim(e.key)}: ${chalk.cyan(e.formattedValue)}`)
     .join("\n");
   return "\n" + multiline;
