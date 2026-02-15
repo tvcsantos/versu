@@ -1,6 +1,13 @@
 import * as core from "@actions/core";
 import type { Logger } from "@versu/core";
 
+function formatElement(element: unknown): string {
+  if (typeof element === "object" && element !== null) {
+    return JSON.stringify(element);
+  }
+  return String(element);
+}
+
 function formatMessage(
   message: string | Error,
   context?: Record<string, unknown>,
@@ -27,13 +34,12 @@ function formatMessage(
         } else {
           lines.push(`  ${key}:`);
           value.forEach(item => {
-            lines.push(`    - ${item}`);
+            const itemStr = formatElement(item);
+            lines.push(`    - ${itemStr}`);
           });
         }
       } else {
-        const valueStr = typeof value === "object" && value !== null
-          ? JSON.stringify(value)
-          : String(value);
+        const valueStr = formatElement(value);
         lines.push(`  ${key}: ${valueStr}`);
       }
     }
@@ -43,9 +49,7 @@ function formatMessage(
   
   // Calculate inline length for non-array entries
   const totalLength = entries.reduce((sum, [key, value]) => {
-    const valueStr = typeof value === "object" && value !== null
-      ? JSON.stringify(value)
-      : String(value);
+    const valueStr = formatElement(value);
     return sum + key.length + valueStr.length;
   }, 0);
   
@@ -53,9 +57,7 @@ function formatMessage(
   if (entries.length <= 3 && totalLength < 80) {
     const inline = entries
       .map(([key, value]) => {
-        const valueStr = typeof value === "object" && value !== null
-          ? JSON.stringify(value)
-          : String(value);
+        const valueStr = formatElement(value);
         return `${key}=${valueStr}`;
       })
       .join(" ");
@@ -65,9 +67,7 @@ function formatMessage(
   // Use multi-line format for complex cases
   const multiline = entries
     .map(([key, value]) => {
-      const valueStr = typeof value === "object" && value !== null
-        ? JSON.stringify(value)
-        : String(value);
+      const valueStr = formatElement(value);
       return `  ${key}: ${valueStr}`;
     })
     .join("\n");

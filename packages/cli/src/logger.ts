@@ -11,73 +11,90 @@ function indent(str: string, spaces: number): string {
   return indentation + str;
 }
 
+function formatElement(element: unknown): string {
+  if (typeof element === "object" && element !== null) {
+    return JSON.stringify(element);
+  }
+  return String(element);
+}
+
 /**
  * Formats context object for beautiful CLI display
  */
-function formatContext(context?: Record<string, unknown>, baseIndent = 0): string {
+function formatContext(
+  context?: Record<string, unknown>,
+  baseIndent = 0,
+): string {
   if (!context || Object.keys(context).length === 0) return "";
 
   const entries = Object.entries(context);
-  
+
   // Check if we have any arrays
-  const hasArrays = entries.some(([_, value]) => Array.isArray(value) && value.length > 0);
-  
+  const hasArrays = entries.some(
+    ([_, value]) => Array.isArray(value) && value.length > 0,
+  );
+
   // If we have arrays, always use multi-line format with list items
   if (hasArrays) {
-    const lineIndent = " ".repeat(baseIndent + 2);
-    const itemIndent = " ".repeat(baseIndent + 4);
+    const lineIndent = baseIndent + 2;
+    const itemIndent = baseIndent + 4;
     const lines: string[] = [];
-    
+
     for (const [key, value] of entries) {
       if (Array.isArray(value)) {
         if (value.length === 0) {
-          lines.push(`${lineIndent}${chalk.dim(key)}: ${chalk.cyan("none")}`);
+          lines.push(
+            indent(`${chalk.dim(key)}: ${chalk.cyan("none")}`, lineIndent),
+          );
         } else {
-          lines.push(`${lineIndent}${chalk.dim(key)}:`);
-          value.forEach(item => {
-            lines.push(`${itemIndent}${chalk.dim("•")} ${chalk.cyan(String(item))}`);
+          lines.push(indent(`${chalk.dim(key)}:`, lineIndent));
+          value.forEach((item) => {
+            const itemStr = formatElement(item);
+            lines.push(
+              indent(`${chalk.dim("•")} ${chalk.cyan(itemStr)}`, itemIndent),
+            );
           });
         }
       } else {
-        const valueStr = typeof value === "object" && value !== null
-          ? JSON.stringify(value)
-          : String(value);
-        lines.push(`${lineIndent}${chalk.dim(key)}: ${chalk.cyan(valueStr)}`);
+        const valueStr = formatElement(value);
+        lines.push(
+          indent(`${chalk.dim(key)}: ${chalk.cyan(valueStr)}`, lineIndent),
+        );
       }
     }
-    
+
     return "\n" + lines.join("\n");
   }
 
   const processedEntries = entries.map(([key, value]) => {
-    let formattedValue: string;
-    
-    if (typeof value === "object" && value !== null) {
-      formattedValue = JSON.stringify(value);
-    } else {
-      formattedValue = String(value);
-    }
-    
+    const formattedValue = formatElement(value);
     return { key, formattedValue, length: key.length + formattedValue.length };
   });
 
   // Calculate total inline length
   const totalLength = processedEntries.reduce((sum, e) => sum + e.length, 0);
-  const hasLongValue = processedEntries.some(e => e.formattedValue.length > 50);
-  
+  const hasLongValue = processedEntries.some(
+    (e) => e.formattedValue.length > 50,
+  );
+
   // Use inline format for simple cases: <= 3 keys and reasonable total length
   if (processedEntries.length <= 3 && totalLength < 80 && !hasLongValue) {
     const inline = processedEntries
-      .map(e => `${chalk.dim(e.key)}=${chalk.cyan(e.formattedValue)}`)
+      .map((e) => `${chalk.dim(e.key)}=${chalk.cyan(e.formattedValue)}`)
       .join(" ");
     return ` ${chalk.dim("(")}${inline}${chalk.dim(")")}`;
   }
-  
+
   // Use multi-line format for complex cases
   // Account for base indentation + icon (2 chars: "ℹ ")
-  const lineIndent = " ".repeat(baseIndent + 2);
+  const lineIndent = baseIndent + 2;
   const multiline = processedEntries
-    .map(e => `${lineIndent}${chalk.dim(e.key)}: ${chalk.cyan(e.formattedValue)}`)
+    .map((e) =>
+      indent(
+        `${chalk.dim(e.key)}: ${chalk.cyan(e.formattedValue)}`,
+        lineIndent,
+      ),
+    )
     .join("\n");
   return "\n" + multiline;
 }
@@ -106,8 +123,7 @@ export class OclifLogger implements Logger {
   constructor(
     private readonly cmd: Command,
     private readonly context: Record<string, unknown> = {},
-  ) {
-  }
+  ) {}
 
   debug(message: string, context?: Record<string, unknown>): void {
     const baseIndent = this.groupDepth * 2;
@@ -126,9 +142,13 @@ export class OclifLogger implements Logger {
     isError = false,
   ): void {
     const baseIndent = this.groupDepth * 2;
-    const formatted = formatMessage(message, { ...this.context, ...context }, baseIndent);
-    const output = indent(color(icon) + " " + formatted, baseIndent);
-    
+    const formatted = formatMessage(
+      message,
+      { ...this.context, ...context },
+      baseIndent,
+    );
+    const output = indent(`${color(icon)} ${formatted}`, baseIndent);
+
     if (this.spinner) {
       if (isError) {
         this.spinner.fail();
@@ -137,9 +157,9 @@ export class OclifLogger implements Logger {
         this.spinner.stop();
       }
     }
-    
+
     logFn(output);
-    
+
     if (this.spinner && !isError) {
       this.spinner.start();
     }
@@ -186,7 +206,7 @@ export class OclifLogger implements Logger {
       this.spinner.succeed();
       this.spinner = null;
     }
-    
+
     this.cmd.log(indent(chalk.bold.cyan(name), this.groupDepth));
     this.groupDepth++;
   }
@@ -199,15 +219,15 @@ export class OclifLogger implements Logger {
         indent: this.groupDepth,
         color: "cyan",
       }).start();
-      
+
       const result = await fn();
-      
+
       // Succeed the spinner when done
       if (this.spinner) {
         this.spinner.succeed(chalk.green("Complete"));
         this.spinner = null;
       }
-      
+
       return result;
     } catch (error) {
       if (this.spinner) {
@@ -224,7 +244,7 @@ export class OclifLogger implements Logger {
     if (this.groupDepth > 0) {
       this.groupDepth--;
     }
-    
+
     // Clean up spinner if still active
     if (this.groupDepth === 0 && this.spinner) {
       this.spinner.stop();

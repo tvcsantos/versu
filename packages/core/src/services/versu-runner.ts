@@ -113,28 +113,22 @@ export class VersuRunner {
   private logShutdownInfo(result: RunnerResult | null): void {
     if (!result) return;
     if (result.bumped) {
-      logger.info("Version updates completed", {
-        moduleCount: result.changedModules.length,
+      logger.info("Modules version updated", {
+        modules: result.changedModules.map((m) => ({
+          id: m.id,
+          from: m.from,
+          to: m.to,
+        })),
       });
-      for (const module of result.changedModules) {
-        logger.debug("Module updated", {
-          moduleId: module.id,
-          from: module.from,
-          to: module.to,
-          bumpType: module.bumpType,
-        });
-      }
 
       if (result.createdTags.length > 0) {
-        logger.info("Tags created", { tagCount: result.createdTags.length });
-        logger.debug("Tag details", { tags: result.createdTags });
+        logger.info("Tags created", { tags: result.createdTags });
       }
 
       if (result.changelogPaths.length > 0) {
         logger.info("Changelog files generated", {
-          fileCount: result.changelogPaths.length,
+          paths: result.changelogPaths,
         });
-        logger.debug("Changelog paths", { paths: result.changelogPaths });
       }
     } else {
       logger.info("All versions up to date");
@@ -343,7 +337,6 @@ export class VersuRunner {
       await this.calculatingBumpsAndApplyingChanges(moduleCommits);
 
     if (changedModules.length === 0) {
-      logger.info("All versions up to date");
       return {
         bumped: false,
         discoveredModules,
