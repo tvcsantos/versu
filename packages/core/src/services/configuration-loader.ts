@@ -30,7 +30,7 @@ export class ConfigurationLoader {
    */
   async load(repoRoot: string): Promise<Config> {
     try {
-      logger.info("Searching for configuration file");
+      logger.info("Searching configuration file", { repoRoot });
 
       // Search for config in standard locations
       const result = await this.explorer.search(repoRoot);

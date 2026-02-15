@@ -23,7 +23,9 @@ import { Module } from "../adapters/project-information.js";
 import { ConfigurationValidatorFactory } from "./configuration-validator.js";
 import { banner } from "../utils/banner.js";
 import path from "path";
-import { PluginLoader } from "../plugins/plugin-loader.js";
+import { PluginContract, PluginLoader } from "../plugins/plugin-loader.js";
+import { pluginContractSchema } from "../plugins/plugin-schema.js";
+import { Commit } from "conventional-commits-parser";
 
 export type RunnerOptions = {
   readonly repoRoot: string;
@@ -66,6 +68,7 @@ export class VersuRunner {
   private adapterIdentifierRegistry!: AdapterIdentifierRegistry;
   private adapterMetadataProvider!: AdapterMetadataProvider;
   private pluginLoader!: PluginLoader; // Will be initialized in run()
+  private configDirectory!: string; // Will be initialized in run()
 
   constructor(options: RunnerOptions) {
     this.options = {
@@ -77,20 +80,28 @@ export class VersuRunner {
     this.configurationLoader = new ConfigurationLoader(
       ConfigurationValidatorFactory.create<Config>(configSchema),
     );
+
+    this.pluginLoader = new PluginLoader(
+      ConfigurationValidatorFactory.create<PluginContract>(
+        pluginContractSchema,
+      ),
+    );
   }
 
   private logStartupInfo(): void {
     logger.info(banner);
-    logger.info(
-      "Composing the history of your code, one version at a time",
-    );
+    logger.info("Composing the history of your code, one version at a time");
     logger.info("Starting versioning engine", {
       repository: this.options.repoRoot,
       adapter: this.options.adapter || "(auto-detect)",
       dryRun: this.options.dryRun,
       prereleaseMode: this.options.prereleaseMode,
-      prereleaseId: this.options.prereleaseMode ? this.options.prereleaseId : undefined,
-      bumpUnchanged: this.options.prereleaseMode ? this.options.bumpUnchanged : undefined,
+      prereleaseId: this.options.prereleaseMode
+        ? this.options.prereleaseId
+        : undefined,
+      bumpUnchanged: this.options.prereleaseMode
+        ? this.options.bumpUnchanged
+        : undefined,
       addBuildMetadata: this.options.addBuildMetadata,
       timestampVersions: this.options.timestampVersions,
       appendSnapshot: this.options.appendSnapshot,
@@ -102,30 +113,27 @@ export class VersuRunner {
   private logShutdownInfo(result: RunnerResult | null): void {
     if (!result) return;
     if (result.bumped) {
-      logger.info(
-        "Version updates completed",
-        { moduleCount: result.changedModules.length }
-      );
+      logger.info("Version updates completed", {
+        moduleCount: result.changedModules.length,
+      });
       for (const module of result.changedModules) {
-        logger.debug(
-          "Module updated",
-          { moduleId: module.id, from: module.from, to: module.to, bumpType: module.bumpType }
-        );
+        logger.debug("Module updated", {
+          moduleId: module.id,
+          from: module.from,
+          to: module.to,
+          bumpType: module.bumpType,
+        });
       }
 
       if (result.createdTags.length > 0) {
-        logger.info(
-          "Tags created",
-          { tagCount: result.createdTags.length }
-        );
+        logger.info("Tags created", { tagCount: result.createdTags.length });
         logger.debug("Tag details", { tags: result.createdTags });
       }
 
       if (result.changelogPaths.length > 0) {
-        logger.info(
-          "Changelog files generated",
-          { fileCount: result.changelogPaths.length }
-        );
+        logger.info("Changelog files generated", {
+          fileCount: result.changelogPaths.length,
+        });
         logger.debug("Changelog paths", { paths: result.changelogPaths });
       }
     } else {
@@ -147,15 +155,13 @@ export class VersuRunner {
     }
   }
 
-  private async doRun(): Promise<RunnerResult> {
-    // Load configuration
-    const configDirectory = path.join(this.options.repoRoot, ".versu");
-    this.config = await this.configurationLoader.load(configDirectory);
+  private async loadConfiguration(): Promise<void> {
+    this.configDirectory = path.join(this.options.repoRoot, ".versu");
+    this.config = await this.configurationLoader.load(this.configDirectory);
+  }
 
-    logger.startGroup("Loading plugins and resolving adapter");
-
-    this.pluginLoader = new PluginLoader();
-    await this.pluginLoader.loadSelectedPlugins(this.config.plugins);
+  private async loadPluginsAndResolveAdapter(): Promise<void> {
+    await this.pluginLoader.load(this.config.plugins);
     const plugins = this.pluginLoader.plugins;
 
     this.adapterIdentifierRegistry = createAdapterIdentifierRegistry(plugins);
@@ -176,41 +182,39 @@ export class VersuRunner {
       plugins.flatMap((plugin) => plugin.adapters),
       this.options.repoRoot,
     );
+  }
 
-    logger.endGroup();
-
-    // Check if working directory is clean
-    if (
-      !this.options.dryRun &&
-      !isWorkingDirectoryClean({ cwd: this.options.repoRoot })
-    ) {
-      throw new Error(
-        "Working directory is not clean. Please commit or stash your changes.",
-      );
-    }
-
-    logger.startGroup("Discovering modules and analyzing commits");
-    
+  private async discoverModulesAndAnalyzeCommits(): Promise<
+    Map<string, { commits: Commit[]; lastTag: string | null }>
+  > {
     // Discover modules and get hierarchy manager
     const detector = this.moduleSystemFactory.createDetector(
-      path.resolve(path.join(configDirectory, "project-information.json")),
+      path.resolve(path.join(this.configDirectory, "project-information.json")),
     );
     this.moduleRegistry = new MapModuleRegistry(await detector.detect());
 
     // Log discovered modules through hierarchy manager
     const moduleIds = this.moduleRegistry.getModuleIds();
-    logger.info("Modules discovered", { count: moduleIds.length, modules: moduleIds });
+    logger.info("Modules discovered", {
+      count: moduleIds.length,
+      modules: moduleIds,
+    });
 
     // Analyze commits since last release
     this.commitAnalyzer = new CommitAnalyzer(
       this.moduleRegistry,
       this.options.repoRoot,
     );
-    const moduleCommits =
-      await this.commitAnalyzer.analyzeCommitsSinceLastRelease();
 
-    logger.endGroup();
+    return await this.commitAnalyzer.analyzeCommitsSinceLastRelease();
+  }
 
+  private async calculatingBumpsAndApplyingChanges(
+    moduleCommits: Map<string, { commits: Commit[]; lastTag: string | null }>
+  ): Promise<{
+    discoveredModules: Array<Module>;
+    changedModules: ModuleChangeResult[];
+  }> {
     // Initialize version bumper service
     const versionBumperOptions: VersionBumperOptions = {
       prereleaseMode: this.options.prereleaseMode,
@@ -236,17 +240,6 @@ export class VersuRunner {
       this.moduleRegistry.getModules().values(),
     );
 
-    if (processedModuleChanges.length === 0) {
-      logger.info("All versions up to date");
-      return {
-        bumped: false,
-        discoveredModules,
-        changedModules: [],
-        createdTags: [],
-        changelogPaths: [],
-      };
-    }
-
     // Create version manager
     const versionUpdateStrategy =
       this.moduleSystemFactory.createVersionUpdateStrategy(this.moduleRegistry);
@@ -263,10 +256,18 @@ export class VersuRunner {
       this.versionManager,
       versionApplierOptions,
     );
+
     const changedModules = await this.versionApplier.applyVersionChanges(
       processedModuleChanges,
     );
 
+    return { discoveredModules, changedModules };
+  }
+
+  private async generateChangelogs(
+    changedModules: ModuleChangeResult[],
+    moduleCommits: Map<string, { commits: Commit[]; lastTag: string | null }>,
+  ): Promise<string[]> {
     this.changelogGenerator = new ChangelogGenerator({
       generateChangelog: this.options.generateChangelog,
       repoRoot: this.options.repoRoot,
@@ -280,6 +281,12 @@ export class VersuRunner {
       moduleCommits,
     );
 
+    return changelogPaths;
+  }
+
+  private async commitChangesAndPush(
+    changedModules: ModuleChangeResult[],
+  ): Promise<string[]> {
     // Initialize git operations service
     const gitOperationsOptions: GitOperationsOptions = {
       pushChanges: this.options.pushChanges,
@@ -297,6 +304,72 @@ export class VersuRunner {
     // Create and push tags
     const createdTags =
       await this.gitOperations.createAndPushTags(changedModules);
+
+    return createdTags;
+  }
+
+  private async doRun(): Promise<RunnerResult> {
+    
+    logger.startGroup("Loading configuration");
+    
+    await this.loadConfiguration();
+    
+    logger.endGroup();
+
+    logger.startGroup("Loading plugins and resolving adapter");
+    
+    await this.loadPluginsAndResolveAdapter();
+    
+    logger.endGroup();
+
+    // Check if working directory is clean
+    if (
+      !this.options.dryRun &&
+      !isWorkingDirectoryClean({ cwd: this.options.repoRoot })
+    ) {
+      throw new Error(
+        "Working directory is not clean. Please commit or stash your changes.",
+      );
+    }
+
+    logger.startGroup("Discovering modules and analyzing commits");
+
+    const moduleCommits = await this.discoverModulesAndAnalyzeCommits();
+
+    logger.endGroup();
+
+    logger.startGroup("Calculating version bumps and applying changes");
+
+    const { discoveredModules, changedModules } =
+      await this.calculatingBumpsAndApplyingChanges(moduleCommits);
+
+    if (changedModules.length === 0) {
+      logger.info("All versions up to date");
+      return {
+        bumped: false,
+        discoveredModules,
+        changedModules: [],
+        createdTags: [],
+        changelogPaths: [],
+      };
+    }
+
+    logger.endGroup();
+
+    logger.startGroup("Generating changelogs");
+
+    const changelogPaths = await this.generateChangelogs(
+      changedModules,
+      moduleCommits,
+    );
+
+    logger.endGroup();
+
+    logger.startGroup("Committing changes and pushing to remote");
+
+    const createdTags = await this.commitChangesAndPush(changedModules);
+
+    logger.endGroup();
 
     logger.info("Semantic evolution completed successfully");
 

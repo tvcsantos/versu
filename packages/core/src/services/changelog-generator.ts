@@ -32,6 +32,13 @@ export class ChangelogGenerator {
       return [];
     }
 
+    if (moduleResults.length === 0) {
+      logger.info(
+        "No modules with declared versions, skipping changelog generation"
+      );
+      return [];
+    }
+
     logger.info("Generating changelogs");
 
     // Generate individual module changelogs
