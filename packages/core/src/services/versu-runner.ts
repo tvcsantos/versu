@@ -105,8 +105,9 @@ export class VersuRunner {
       addBuildMetadata: this.options.addBuildMetadata,
       timestampVersions: this.options.timestampVersions,
       appendSnapshot: this.options.appendSnapshot,
-      pushChanges: this.options.pushChanges,
+      createTags: this.options.createTags,
       generateChangelog: this.options.generateChangelog,
+      pushChanges: this.options.pushChanges,
     });
   }
 

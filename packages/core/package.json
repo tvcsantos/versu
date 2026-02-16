@@ -1,6 +1,6 @@
 {
   "name": "@versu/core",
-  "version": "0.6.11",
+  "version": "0.6.12",
   "description": "VERSU (Core Library)",
   "type": "module",
   "main": "dist/index.js",
