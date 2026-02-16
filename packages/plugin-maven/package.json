@@ -1,0 +1,70 @@
+{
+  "name": "@versu/plugin-maven",
+  "version": "0.6.13",
+  "description": "VERSU Maven Plugin",
+  "type": "module",
+  "main": "dist/index.js",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "scripts": {
+    "prebuild": "node scripts/generate-version.js",
+    "build": "npm run build:esm",
+    "build:esm": "tsc --project tsconfig.json --outDir dist",
+    "build:cjs": "tsc --project tsconfig.cjs.json --outDir dist",
+    "test": "vitest",
+    "test:coverage": "vitest --coverage",
+    "lint": "eslint src/**/*.ts",
+    "format": "prettier --write src/**/*.ts"
+  },
+  "keywords": [
+    "versu",
+    "plugin",
+    "maven",
+    "semantic-versioning",
+    "conventional-commits",
+    "version-engine",
+    "dependency-cascade",
+    "monorepo"
+  ],
+  "author": "tvcsantos",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tvcsantos/versu.git",
+    "directory": "packages/plugin-maven"
+  },
+  "bugs": {
+    "url": "https://github.com/tvcsantos/versu/issues"
+  },
+  "homepage": "https://github.com/tvcsantos/versu#readme",
+  "files": [
+    "dist"
+  ],
+  "types": "dist/index.d.ts",
+  "dependencies": {
+    "@xmldom/xmldom": "^0.8.11",
+    "xpath": "^0.0.34"
+  },
+  "peerDependencies": {
+    "@versu/core": "^0.6.13"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.23",
+    "@types/semver": "^7.7.1",
+    "@typescript-eslint/eslint-plugin": "^6.15.0",
+    "@typescript-eslint/parser": "^6.15.0",
+    "@versu/core": "^0.6.13",
+    "@vitest/coverage-v8": "^1.1.0",
+    "eslint": "^8.56.0",
+    "prettier": "^3.1.1",
+    "typescript": "^5.3.3",
+    "vitest": "^1.1.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
