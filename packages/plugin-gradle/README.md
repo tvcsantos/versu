@@ -70,7 +70,7 @@ versu --adapter gradle
   run: npm install -g @versu/plugin-gradle
 
 - name: Version modules
-  uses: tvcsantos/versu@v0
+  uses: versuhq/versu@v0
   with:
     adapter: gradle
 ```

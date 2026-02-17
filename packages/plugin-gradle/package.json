@@ -1,6 +1,6 @@
 {
   "name": "@versu/plugin-gradle",
-  "version": "0.6.14",
+  "version": "0.6.15",
   "description": "VERSU Gradle Plugin",
   "type": "module",
   "main": "dist/index.js",
@@ -35,13 +35,13 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/tvcsantos/versu.git",
+    "url": "git+https://github.com/versuhq/versu.git",
     "directory": "packages/plugin-gradle"
   },
   "bugs": {
-    "url": "https://github.com/tvcsantos/versu/issues"
+    "url": "https://github.com/versuhq/versu/issues"
   },
-  "homepage": "https://github.com/tvcsantos/versu#readme",
+  "homepage": "https://github.com/versuhq/versu#readme",
   "files": [
     "dist"
   ],
@@ -51,10 +51,10 @@
     "fast-glob": "^3.3.3"
   },
   "peerDependencies": {
-    "@versu/core": "^0.6.14"
+    "@versu/core": "^0.6.15"
   },
   "devDependencies": {
-    "@versu/core": "^0.6.14",
+    "@versu/core": "^0.6.15",
     "@types/node": "^20.19.23",
     "@types/semver": "^7.7.1",
     "@typescript-eslint/eslint-plugin": "^6.15.0",

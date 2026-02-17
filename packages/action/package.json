@@ -1,6 +1,6 @@
 {
   "name": "@versu/action",
-  "version": "0.6.14",
+  "version": "0.6.15",
   "description": "VERSU (GitHub Action)",
   "main": "dist/index.js",
   "private": true,
@@ -29,19 +29,19 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/tvcsantos/versu.git",
+    "url": "git+https://github.com/versuhq/versu.git",
     "directory": "packages/action"
   },
   "bugs": {
-    "url": "https://github.com/tvcsantos/versu/issues"
+    "url": "https://github.com/versuhq/versu/issues"
   },
-  "homepage": "https://github.com/tvcsantos/versu#readme",
+  "homepage": "https://github.com/versuhq/versu#readme",
   "files": ["dist"],
   "dependencies": {
     "@actions/core": "^1.10.1",
     "@actions/exec": "^1.1.1",
     "@actions/github": "^6.0.0",
-    "@versu/core": "^0.6.14"
+    "@versu/core": "^0.6.15"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^28.0.8",

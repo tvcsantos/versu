@@ -279,10 +279,10 @@ This guide was adapted from [weallcontribute] `CONTRIBUTING.md`.
 
 [conventional-commits]: https://www.conventionalcommits.org/
 [keep-a-changelog]: https://keepachangelog.com/
-[issue-tracker]: https://github.com/tvcsantos/versu/issues
-[pull-requests]: https://github.com/tvcsantos/versu/pulls
-[support-open-issues]: https://github.com/tvcsantos/versu/issues?q=is%3Aopen+is%3Aissue+label%3Asupport
-[unlabeled-open-issues]: https://github.com/tvcsantos/versu/issues?q=is%3Aopen+is%3Aissue+no%3Alabel
+[issue-tracker]: https://github.com/versuhq/versu/issues
+[pull-requests]: https://github.com/versuhq/versu/pulls
+[support-open-issues]: https://github.com/versuhq/versu/issues?q=is%3Aopen+is%3Aissue+label%3Asupport
+[unlabeled-open-issues]: https://github.com/versuhq/versu/issues?q=is%3Aopen+is%3Aissue+no%3Alabel
 [weallcontribute]: https://www.npmjs.com/package/weallcontribute
 [how-to-fork-and-pr]: https://guides.github.com/activities/forking
 [pull-requests-reviews]: https://help.github.com/articles/about-pull-request-reviews/
