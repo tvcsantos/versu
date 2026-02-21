@@ -1,6 +1,6 @@
 {
   "name": "@versu/plugin-gradle",
-  "version": "0.6.15",
+  "version": "0.6.16",
   "description": "VERSU Gradle Plugin",
   "type": "module",
   "main": "dist/index.js",
@@ -51,10 +51,10 @@
     "fast-glob": "^3.3.3"
   },
   "peerDependencies": {
-    "@versu/core": "^0.6.15"
+    "@versu/core": "^0.6.16"
   },
   "devDependencies": {
-    "@versu/core": "^0.6.15",
+    "@versu/core": "^0.6.16",
     "@types/node": "^20.19.23",
     "@types/semver": "^7.7.1",
     "@typescript-eslint/eslint-plugin": "^6.15.0",

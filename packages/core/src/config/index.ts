@@ -170,6 +170,23 @@ export type Config = z.infer<typeof configSchema>;
  */
 export type DependencyRules = z.infer<typeof dependencyRulesSchema>;
 
+export type VersuConfig = {
+  plugins?: string[];
+  versionRules?: {
+    defaultBump: BumpType;
+    commitTypeBumps: Record<string, BumpType | "ignore">;
+    dependencyBumps: {
+      major: BumpType;
+      minor: BumpType;
+      patch: BumpType;
+    };
+  };
+  changelog?: {
+    root?: ModuleChangelogConfig;
+    module?: ModuleChangelogConfig;
+  };
+};
+
 export type ModuleChangelogConfig = {
   context?: Context<Commit> & { prependPlaceholder: string };
   options?: Options<Commit>;

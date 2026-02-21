@@ -29,3 +29,5 @@ coverage/
 
 dist/
 !packages/action/dist/
+
+docs-vitepress/

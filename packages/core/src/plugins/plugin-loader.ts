@@ -6,6 +6,7 @@ import type { ModuleSystemFactory } from "../services/module-system-factory.js";
 import { ConfigurationValidator } from "../services/configuration-validator.js";
 import { getNodeModulesPath } from "../utils/node.js";
 import { getPluginPath } from "../utils/plugins.js";
+import fg from "fast-glob";
 
 export type PluginContract = {
   id: string;
@@ -50,15 +51,7 @@ export class PluginLoader {
     }
   }
 
-  /**
-   * 2. Load ONLY the plugins specified in the whitelist
-   * @param pluginNames List of package names (e.g. ['my-plugin-alpha', '@scope/my-plugin-beta'])
-   */
-  public async load(pluginNames: string[]) {
-    logger.info("Loading plugins", { count: pluginNames.length });
-
-    logger.debug("Plugin loading configuration", { pluginNames });
-
+  private async getCandidateRoots(): Promise<string[]> {
     await this.initializeNodeModulesPaths();
 
     const candidateRoots = [
@@ -69,6 +62,81 @@ export class PluginLoader {
     if (candidateRoots.length === 0) {
       throw new Error("No node_modules paths available to search for plugins");
     }
+
+    return candidateRoots;
+  }
+
+  private async findPluginsInNodeModules(
+    nodeModulesPath: string,
+  ): Promise<{ name: string; path: string }[]> {
+    logger.debug("Searching for plugins in node_modules", { nodeModulesPath });
+
+    const patterns = [
+      `${nodeModulesPath}/versu-plugin-*/package.json`,
+      `${nodeModulesPath}/@*/versu-plugin-*/package.json`,
+      `${nodeModulesPath}/@versu/plugin-*/package.json`,
+    ];
+    const entries = await fg(patterns, { absolute: true });
+    const plugins = entries
+      .map((entry) => {
+        const parts = entry.split(path.sep);
+        const packageIndex =
+          parts.findIndex((part) => part === "node_modules") + 1;
+        if (packageIndex > 0 && packageIndex < parts.length) {
+          return {
+            name: parts.slice(packageIndex, parts.length - 1).join(path.sep),
+            path: path.join(path.sep, ...parts.slice(0, parts.length - 1)),
+          };
+        }
+      })
+      .filter((plugin): plugin is { name: string; path: string } => !!plugin);
+    return plugins;
+  }
+
+  private async detect(): Promise<void> {
+    logger.info("Loading all plugins from node_modules");
+
+    const candidateRoots = await this.getCandidateRoots();
+
+    const loadedPluginIds = new Set<string>();
+    const loadedPluginPaths = new Map<string, string>();
+
+    for (const root of candidateRoots) {
+      const plugins = await this.findPluginsInNodeModules(root);
+      for (const plugin of plugins) {
+        if (loadedPluginIds.has(plugin.name)) {
+          logger.warning("Plugin already loaded, skipping duplicate", {
+            pluginName: plugin.name,
+            from: loadedPluginPaths.get(plugin.name),
+          });
+        } else {
+          const loaded = await this.loadPluginFromPath(plugin.path);
+          if (loaded) {
+            loadedPluginIds.add(plugin.name);
+            loadedPluginPaths.set(plugin.name, plugin.path);
+          }
+        }
+      }
+    }
+  }
+
+  /**
+   * 2. Load ONLY the plugins specified in the whitelist
+   * @param pluginNames List of package names (e.g. ['my-plugin-alpha', '@scope/my-plugin-beta'])
+   */
+  public async load(pluginNames: string[]): Promise<void> {
+    if (pluginNames.length === 0) {
+      logger.info(
+        "No plugins specified for loading, defaulting to auto-detect",
+      );
+      return await this.detect();
+    }
+
+    logger.info("Loading plugins", { count: pluginNames.length });
+
+    logger.debug("Plugin loading configuration", { pluginNames });
+
+    const candidateRoots = await this.getCandidateRoots();
 
     for (const pluginName of pluginNames) {
       const pluginPath = await getPluginPath(candidateRoots, pluginName);
@@ -83,7 +151,7 @@ export class PluginLoader {
   /**
    * 3. Dynamically require the plugin
    */
-  private async loadPluginFromPath(absolutePath: string): Promise<void> {
+  private async loadPluginFromPath(absolutePath: string): Promise<boolean> {
     try {
       logger.info("Attempting to load plugin");
       logger.debug("Loading plugin", { path: absolutePath });
@@ -105,7 +173,7 @@ export class PluginLoader {
           pluginId: plugin.id,
           path: absolutePath,
         });
-        return;
+        return false;
       }
 
       this.pluginsMap.set(plugin.id, plugin);
@@ -122,5 +190,6 @@ export class PluginLoader {
         error: errorMessage,
       });
     }
+    return true;
   }
 }
